@@ -11,5 +11,8 @@
     "network"
   ],
   "author": "Fraser Sabine",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "mathjs": "^6.2.5"
+  }
 }
