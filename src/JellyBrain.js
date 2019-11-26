@@ -29,7 +29,7 @@ let tanh = new ActivationFunction(
 );
 
 class JellyBrain {
-    constructor(inputNodes, hiddenNodes, outputNodes, learningRate = 0.1, activationFunction = sigmoid) {
+    constructor(inputNodes, hiddenNodes, outputNodes, learningRate = 0.15, activationFunction = sigmoid) {
         // set the parameteres for the neural network
         this.inputNodes = inputNodes;
         this.hiddenNodes = hiddenNodes;
@@ -46,8 +46,8 @@ class JellyBrain {
         this.weightsHO = math.random([this.hiddenNodes, this.outputNodes], -initHORange, initHORange);
 
         // create bias arrays with initialisation to 0
-        this.biasH = math.zeros(this.hiddenNodes);
-        this.biasO = math.zeros(this.outputNodes);
+        this.biasH = math.zeros(this.hiddenNodes).toArray();
+        this.biasO = math.zeros(this.outputNodes).toArray();
 
     }
 
@@ -62,7 +62,7 @@ class JellyBrain {
         let outputA = math.map(outputZ, this.activation.func);
 
         // send back array of outputs
-        return outputA.toArray();
+        return outputA;
     }
 
     train(inputs, targets) {
@@ -76,53 +76,41 @@ class JellyBrain {
         let outputA = math.map(outputZ, this.activation.func);
 
         // --Backpropogation algorithm--
+        // -Layer 1-
         // dc/da(outputs)
-        let dcdao = math.subtract(targets, inputs);
+        let dcdao = math.subtract(targets, outputA);
 
         // da/dz(outputs)
         let dadzo = math.map(outputZ, this.activation.dfunc);
 
-        // Set biases for output layer
-        // dc/db(outputs) = dc/dao .* da/dzo .* dz/dbo where dz/dbo = 1
-        let dcdbo = math.dotMultiply(dcdao, dadzo);
-        this.biasO = math.add(this.biasO, math.multiply(dcdbo, this.learningRate));
+        // dc/dz(outputs) = dc/dao ⊙ da/dzo
+        let dcdzo = math.dotMultiply(dcdao, dadzo);
 
-        // Set weights for output layer
-        // dc/dw(outputs) = dc/dao .* da/dzo .* dz/dwo = dc/dbo .* dz/dwo = dc/dbo .* hiddenA
-        let dcdwo = math.zeros(math.size(this.weightsHO));
-        for (let i = 0; i < math.size(this.weightsHO)[0]; i++) {
-            for (let j = 0; j < math.size(this.weightsHO)[1]; j++) {
-                dcdwo[i][j] = hiddenA[i] * dcdbo[j];
-            }
-        }
+        // dc/dw(outputs) = dzo/dwo(T) * dc/dzo
+        let dcdwo = math.multiply(math.transpose([hiddenA]), [dcdzo]);
 
+        // -Layer 2-
         // dc/da(hidden)
-        let dcdah = math.multiply(dcdbo, math.transpose(this.weightsHO));
+        let dcdah = math.multiply(dcdzo, math.transpose(this.weightsHO));
 
         // da/dz(hidden)
         let dadzh = math.map(hiddenZ, this.activation.dfunc);
 
-        // Set biases for hidden layer
-        // dc/db(hidden) = dc/dah .* da/dzh .* dz/dbh where dz/dbh = 1
-        let dcdbh = math.dotMultiply(dcdah, dadzh);
-        this.biasH = math.add(this.biasH, math.multiply(dcdbh, this.learningRate));
+        // dc/dz(hidden) = dc/dah ⊙ da/dzh
+        let dcdzh = math.dotMultiply(dcdah, dadzh);
 
-        // Set weights for output layer
-        // dc/dw(outputs) = dc/dao .* da/dzo .* dz/dwo = dc/dbo .* dz/dwo = dc/dbo .* hiddenA
-        let dcdwh = math.zeros(math.size(this.weightsIH));
-        for (let i = 0; i < math.size(this.weightsIH)[0]; i++) {
-            for (let j = 0; j < math.size(this.weightsIH)[1]; j++) {
-                dcdwh[i][j] = inputs[i] * dcdbh[j];
-            }
-        }
+        // dc/dw(hidden) = dzh/dwh(T) * dc/dzh
+        let dcdwh = math.multiply(math.transpose([inputs]), [dcdzh]);
+
+        // Update Biases
+        this.biasO = math.add(this.biasO, math.multiply(dcdzo, this.learningRate));
+        this.biasH = math.add(this.biasH, math.multiply(dcdzh, this.learningRate));
 
         // Update weights
         this.weightsHO = math.add(this.weightsHO, math.multiply(dcdwo, this.learningRate));
         this.weightsIH = math.add(this.weightsIH, math.multiply(dcdwh, this.learningRate));
 
-        console.table(this.weightsHO);
-        console.table(this.weightsIH);
-        return outputA.toArray();
+        return dcdao;
     }
 
     clone(brain) {
@@ -132,7 +120,17 @@ class JellyBrain {
 
 }
 
-test = new JellyBrain(2, 2, 2);
+test = new JellyBrain(2, 2, 1);
 
-//console.table(test.guess([5, 2]));
-console.table(test.train([0.4, 0.8], [1, 1]));
+test.train([0, 0], [0]);
+test.train([0, 1], [0]);
+test.train([1, 0], [0]);
+test.train([1, 1], [1]);
+
+console.table(test.guess([1, 1], [1]));
+
+// console.table(test.train([0.5, 0.5], [1, 1]));
+// for (let i = 0; i < 300; i++) {
+//     test.train([0.5, 0.5], [1, 1]);
+// }
+// console.table(test.train([0.5, 0.5], [1, 1]));
