@@ -20,16 +20,16 @@ let relu = new ActivationFunction(
 
 let sigmoid = new ActivationFunction(
     x => 1 / (1 + math.exp(-x)),
-    y => y * (1 - y)
+    y => (1 / (1 + math.exp(-y))) * (1 - (1 / (1 + math.exp(-y))))
 );
 
 let tanh = new ActivationFunction(
     x => math.tanh(x),
-    y => 1 - (y * y)
+    y => 1 - (math.tanh(y) * math.tanh(y))
 );
 
-class JellyBrain {
-    constructor(inputNodes, hiddenNodes, outputNodes, learningRate = 0.15, activationFunction = sigmoid) {
+module.exports = class JellyBrain {
+    constructor(inputNodes, hiddenNodes, outputNodes, learningRate = -0.15, activationFunction = tanh) {
         // set the parameteres for the neural network
         this.inputNodes = inputNodes;
         this.hiddenNodes = hiddenNodes;
@@ -78,7 +78,7 @@ class JellyBrain {
         // --Backpropogation algorithm--
         // -Layer 1-
         // dc/da(outputs)
-        let dcdao = math.subtract(targets, outputA);
+        let dcdao = math.multiply(math.subtract(targets, outputA), -1);
 
         // da/dz(outputs)
         let dadzo = math.map(outputZ, this.activation.dfunc);
@@ -116,21 +116,7 @@ class JellyBrain {
     clone(brain) {
         // clone an existing trained brain
     }
-
-
 }
 
-test = new JellyBrain(2, 2, 1);
+//test = new JellyBrain(2, 2, 2);
 
-test.train([0, 0], [0]);
-test.train([0, 1], [0]);
-test.train([1, 0], [0]);
-test.train([1, 1], [1]);
-
-console.table(test.guess([1, 1], [1]));
-
-// console.table(test.train([0.5, 0.5], [1, 1]));
-// for (let i = 0; i < 300; i++) {
-//     test.train([0.5, 0.5], [1, 1]);
-// }
-// console.table(test.train([0.5, 0.5], [1, 1]));
