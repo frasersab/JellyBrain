@@ -1,3 +1,6 @@
+// This is a simple neural network
+// By Fraser Sabine
+
 const math = require('mathjs')
 
 // activation function class
@@ -29,7 +32,7 @@ let tanh = new ActivationFunction(
 );
 
 module.exports = class JellyBrain {
-    constructor(inputNodes, hiddenNodes, outputNodes, learningRate = -0.15, activationFunction = tanh) {
+    constructor(inputNodes, hiddenNodes, outputNodes, learningRate = 0.3, activationFunction = tanh) {
         // set the parameteres for the neural network
         this.inputNodes = inputNodes;
         this.hiddenNodes = hiddenNodes;
@@ -78,7 +81,7 @@ module.exports = class JellyBrain {
         // --Backpropogation algorithm--
         // -Layer 1-
         // dc/da(outputs)
-        let dcdao = math.multiply(math.subtract(targets, outputA), -1);
+        let dcdao = math.subtract(targets, outputA);
 
         // da/dz(outputs)
         let dadzo = math.map(outputZ, this.activation.dfunc);
@@ -117,6 +120,3 @@ module.exports = class JellyBrain {
         // clone an existing trained brain
     }
 }
-
-//test = new JellyBrain(2, 2, 2);
-
