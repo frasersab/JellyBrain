@@ -7,11 +7,11 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Launch Program",
+            "name": "Launch binaryClassification",
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}\\src\\JellyBrain.js"
+            "program": "${workspaceFolder}\\src\\binaryClassification.js"
         }
     ]
 }

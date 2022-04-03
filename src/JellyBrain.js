@@ -4,35 +4,43 @@
 const math = require('mathjs')
 
 // activation function class
-class ActivationFunction {
-    constructor(func, dfunc) {
+class ActivationFunction
+{
+    constructor(func, dfunc)
+    {
         this.func = func;
         this.dfunc = dfunc;
     }
 }
 
-let lrelu = new ActivationFunction(
+let lrelu = new ActivationFunction
+(
     x => { if (x < 0) { return 0.1 * x } else { return x } },
     y => { if (y < 0) { return 0.1 } else { return 1 } }
 );
 
-let relu = new ActivationFunction(
+let relu = new ActivationFunction
+(
     x => { if (x < 0) { return 0 } else { return x } },
     y => { if (y <= 0) { return 0 } else { return 1 } }
 );
 
-let sigmoid = new ActivationFunction(
+let sigmoid = new ActivationFunction
+(
     x => 1 / (1 + math.exp(-x)),
     y => (1 / (1 + math.exp(-y))) * (1 - (1 / (1 + math.exp(-y))))
 );
 
-let tanh = new ActivationFunction(
+let tanh = new ActivationFunction
+(
     x => math.tanh(x),
     y => 1 - (math.tanh(y) * math.tanh(y))
 );
 
-module.exports = class JellyBrain {
-    constructor(inputNodes, hiddenNodes, outputNodes, learningRate = 0.3, activationFunction = tanh) {
+module.exports = class JellyBrain
+{
+    constructor(inputNodes, hiddenNodes, outputNodes, learningRate = 0.3, activationFunction = tanh)
+    {
         // set the parameteres for the neural network
         this.inputNodes = inputNodes;
         this.hiddenNodes = hiddenNodes;
@@ -54,7 +62,8 @@ module.exports = class JellyBrain {
 
     }
 
-    guess(inputs) {
+    guess(inputs)
+    {
         // --Feedforward algorithm--
         // generate hidden layer Z and A
         let hiddenZ = math.add(math.multiply(inputs, this.weightsIH), this.biasH);
@@ -68,7 +77,8 @@ module.exports = class JellyBrain {
         return outputA;
     }
 
-    train(inputs, targets) {
+    train(inputs, targets)
+    {
         // --Feedforward algorithm--
         // generate hidden layer Z and A
         let hiddenZ = math.add(math.multiply(inputs, this.weightsIH), this.biasH);
@@ -116,7 +126,8 @@ module.exports = class JellyBrain {
         return dcdao;
     }
 
-    clone(brain) {
+    clone(brain)
+    {
         // clone an existing trained brain
     }
 }
