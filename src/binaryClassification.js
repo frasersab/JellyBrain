@@ -61,7 +61,6 @@ function tester(brain, amount)
         }
     }
     return accuracy = (accuracy / amount) * 100;
-    //console.log(`${accuracy}% Accurate`);
 }
 
 let accuracyTable = Array();

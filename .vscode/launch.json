@@ -7,6 +7,15 @@
         {
             "type": "node",
             "request": "launch",
+            "name": "Launch simpleLinearRegression",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${workspaceFolder}\\src\\simpleLinearRegression.js"
+        },
+        {
+            "type": "node",
+            "request": "launch",
             "name": "Launch binaryClassification",
             "skipFiles": [
                 "<node_internals>/**"
