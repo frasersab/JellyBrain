@@ -1,62 +1,52 @@
 // This tests the neural networks ability to classify if a point is above or bellow a line
 
-import {JellyBrain} from './JellyBrain.js'
+import { JellyBrain } from './JellyBrain.js'
 
 let brain = new JellyBrain(2, 1, 1);
 
 // line function
-function y(x)
-{
+function y(x) {
     return x;
 }
 
 // training function
-function trainer(brain, amount)
-{
+function trainer(brain, amount) {
     let inputs = Array(amount);
-    let outputs = Array(amount);
+    let targets = Array(amount);
 
-    for (let i = 0; i < amount; i++)
-    {
+    for (let i = 0; i < amount; i++) {
         inputs[i] = [Math.random(), Math.random()];
         // if input is below line then 0, if above then 1
-        if (y(inputs[i][0]) > inputs[i][1])
-        {
-            outputs[i] = 0;
-        } 
-        else
-        {
-            outputs[i] = 1;
+        if (y(inputs[i][0]) > inputs[i][1]) {
+            targets[i] = 0;
         }
-        brain.train(inputs[i], outputs[i]);
+        else {
+            targets[i] = 1;
+        }
+        brain.train(inputs[i], targets[i]);
     }
 }
 
 // testing function
-function tester(brain, amount)
-{
+function tester(brain, amount) {
     let inputs = Array(amount);
-    let outputs = Array(amount);
+    let targets = Array(amount);
     let guess = Array(amount);
     let accuracy = 0;
 
-    for (let i = 0; i < amount; i++)
-    {
+    for (let i = 0; i < amount; i++) {
         inputs[i] = [Math.random(), Math.random()];
         // if input is below line then 0, if above then 1
-        if (y(inputs[i][0]) > inputs[i][1])
-        {
-            outputs[i] = 0;
-        } 
-        else
-        {
-            outputs[i] = 1;
+        if (y(inputs[i][0]) > inputs[i][1]) {
+            targets[i] = 0;
+        }
+        else {
+            targets[i] = 1;
         }
 
         guess[i] = Math.round(brain.guess(inputs[i]));
 
-        if (guess[i] == outputs[i])
-        {
+        if (guess[i] == targets[i]) {
             accuracy++;
         }
     }
