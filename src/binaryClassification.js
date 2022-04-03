@@ -1,7 +1,8 @@
 // This tests the neural networks ability to classify if a point is above or bellow a line
 
-const JellyBrain = require('./JellyBrain');
-brain = new JellyBrain(2, 1, 1);
+import {JellyBrain} from './JellyBrain.js'
+
+let brain = new JellyBrain(2, 1, 1);
 
 // line function
 function y(x)
@@ -36,7 +37,7 @@ function tester(brain, amount)
 {
     let inputs = Array(amount);
     let outputs = Array(amount);
-    let correct = Array(amount);
+    let guess = Array(amount);
     let accuracy = 0;
 
     for (let i = 0; i < amount; i++)
@@ -51,22 +52,29 @@ function tester(brain, amount)
         {
             outputs[i] = 1;
         }
-        let rawguess = brain.guess(inputs[i]);
-        let guess = Math.round(brain.guess(inputs[i]));
-        let answer = outputs[i];
-        if (guess == outputs[i])
+
+        guess[i] = Math.round(brain.guess(inputs[i]));
+
+        if (guess[i] == outputs[i])
         {
-            correct[i] = 1;
             accuracy++;
         }
-        else
-        {
-            correct[i] = 0;
-        }
     }
-    accuracy = accuracy / (amount / 100);
-    console.log(accuracy + "% Accurate")
+    return accuracy = (accuracy / amount) * 100;
+    //console.log(`${accuracy}% Accurate`);
 }
 
-//trainer(brain, 10);
-tester(brain, 1000);
+let accuracyTable = Array();
+accuracyTable.push(["Training Samples", "Accuracy"]);
+
+accuracyTable.push([0, tester(brain, 10000)]);
+trainer(brain, 10);
+accuracyTable.push([10, tester(brain, 10000)]);
+trainer(brain, 90);
+accuracyTable.push([100, tester(brain, 10000)]);
+trainer(brain, 400);
+accuracyTable.push([500, tester(brain, 10000)]);
+trainer(brain, 500);
+accuracyTable.push([1000, tester(brain, 10000)]);
+
+console.table(accuracyTable);

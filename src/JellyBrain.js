@@ -1,7 +1,7 @@
 // This is a simple neural network
 // By Fraser Sabine
 
-const math = require('mathjs')
+import * as math from 'mathjs';
 
 // activation function class
 class ActivationFunction
@@ -13,33 +13,39 @@ class ActivationFunction
     }
 }
 
-let lrelu = new ActivationFunction
+export let lrelu = new ActivationFunction
 (
     x => { if (x < 0) { return 0.1 * x } else { return x } },
     y => { if (y < 0) { return 0.1 } else { return 1 } }
 );
 
-let relu = new ActivationFunction
+export let relu = new ActivationFunction
 (
     x => { if (x < 0) { return 0 } else { return x } },
     y => { if (y <= 0) { return 0 } else { return 1 } }
 );
 
-let sigmoid = new ActivationFunction
+export let sigmoid = new ActivationFunction
 (
     x => 1 / (1 + math.exp(-x)),
     y => (1 / (1 + math.exp(-y))) * (1 - (1 / (1 + math.exp(-y))))
 );
 
-let tanh = new ActivationFunction
+export let tanh = new ActivationFunction
 (
     x => math.tanh(x),
     y => 1 - (math.tanh(y) * math.tanh(y))
 );
 
-module.exports = class JellyBrain
+export let linear = new ActivationFunction
+(
+    x => x,
+    y => y
+);
+
+export class JellyBrain
 {
-    constructor(inputNodes, hiddenNodes, outputNodes, learningRate = 0.3, activationFunction = tanh)
+    constructor(inputNodes, hiddenNodes, outputNodes, learningRate = 0.3, activationFunction = tanh, activationFunctionOutput = tanh)
     {
         // set the parameteres for the neural network
         this.inputNodes = inputNodes;
@@ -47,6 +53,7 @@ module.exports = class JellyBrain
         this.outputNodes = outputNodes;
         this.learningRate = learningRate;
         this.activation = activationFunction;
+        this.activationOutput = activationFunctionOutput;
 
         // find the optimal range to initialise the weights to prevent saturation
         let initIHRange = 1 / math.sqrt(this.hiddenNodes);
@@ -71,7 +78,7 @@ module.exports = class JellyBrain
 
         // generate outputs Z and A
         let outputZ = math.add(math.multiply(hiddenA, this.weightsHO), this.biasO);
-        let outputA = math.map(outputZ, this.activation.func);
+        let outputA = math.map(outputZ, this.activationOutput.func);
 
         // send back array of outputs
         return outputA;
@@ -86,7 +93,7 @@ module.exports = class JellyBrain
 
         // generate outputs Z and A
         let outputZ = math.add(math.multiply(hiddenA, this.weightsHO), this.biasO);
-        let outputA = math.map(outputZ, this.activation.func);
+        let outputA = math.map(outputZ, this.activationOutput.func);
 
         // --Backpropogation algorithm--
         // -Layer 1-
