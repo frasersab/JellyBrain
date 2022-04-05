@@ -15,6 +15,7 @@
   "author": "Fraser Sabine",
   "license": "ISC",
   "dependencies": {
+    "canvas": "^2.9.1",
     "mathjs": "^10.4.2"
   }
 }
