@@ -133,9 +133,22 @@ class JellyBrain
         return dcdao;
     }
 
-    clone(brain)
+    exportBrain()
     {
-        // clone an existing trained brain
+        var brainExport = {};
+        brainExport["weightsIH"] = this.weightsIH;
+        brainExport["weightsHO"] = this.weightsHO;
+        brainExport["biasH"] = this.biasH;
+        brainExport["biasO"] = this.biasO;
+        return brainExport;
+    }
+
+    importBrain(brainImport)
+    {
+        this.weightsIH = brainImport.weightsIH;
+        this.weightsHO = brainImport.weightsHO;
+        this.biasH = brainImport.biasH;
+        this.biasO = brainImport.biasO;
     }
 }
 
