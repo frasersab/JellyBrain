@@ -1,10 +1,10 @@
 var fs = require('fs');
 const {createCanvas} = require('canvas');
 
-function readMNIST(start, end)
+function readMNIST(start, end, imageFile, labelFile)
 {
-    var dataFileBuffer = fs.readFileSync(__dirname + '\\test_images_10k.idx3-ubyte');
-    var labelFileBuffer = fs.readFileSync(__dirname + '\\test_labels_10k.idx1-ubyte');
+    var dataFileBuffer = fs.readFileSync(__dirname + imageFile);
+    var labelFileBuffer = fs.readFileSync(__dirname + labelFile);
     var pixelValues = [];
     
     for (var image = start; image < end; image++)
@@ -27,12 +27,12 @@ function readMNIST(start, end)
     return pixelValues;
 }
 
-function saveMNIST(start, end)
+function saveMNIST(start, end, imageFile, labelFile)
 {
     const canvas = createCanvas(28, 28);
     const ctx = canvas.getContext('2d');
 
-    var pixelValues = readMNIST(start, end);
+    var pixelValues = readMNIST(start, end, imageFile, labelFile);
 
     pixelValues.forEach(function(image)
     { 
@@ -52,4 +52,7 @@ function saveMNIST(start, end)
     })
 }
 
-saveMNIST(0, 5);
+saveMNIST(0, 5, '\\test_images_10k.idx3-ubyte', '\\test_labels_10k.idx1-ubyte');
+
+exports.readMNIST = readMNIST
+exports.saveMNIST = saveMNIST

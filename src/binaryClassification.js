@@ -1,6 +1,6 @@
 // This tests the neural networks ability to classify if a point is above or bellow a line
 
-import { JellyBrain } from './JellyBrain.js'
+const { JellyBrain } = require('./JellyBrain.js')
 
 let brain = new JellyBrain(2, 1, 1);
 

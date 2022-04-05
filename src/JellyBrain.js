@@ -1,7 +1,7 @@
 // This is a simple neural network
 // By Fraser Sabine
 
-import * as math from 'mathjs';
+const math = require('mathjs')
 
 // activation function class
 class ActivationFunction
@@ -13,37 +13,37 @@ class ActivationFunction
     }
 }
 
-export let lrelu = new ActivationFunction
+let lrelu = new ActivationFunction
 (
     x => { if (x < 0) { return 0.1 * x } else { return x } },
     y => { if (y < 0) { return 0.1 } else { return 1 } }
 );
 
-export let relu = new ActivationFunction
+let relu = new ActivationFunction
 (
     x => { if (x < 0) { return 0 } else { return x } },
     y => { if (y <= 0) { return 0 } else { return 1 } }
 );
 
-export let sigmoid = new ActivationFunction
+let sigmoid = new ActivationFunction
 (
     x => 1 / (1 + math.exp(-x)),
     y => (1 / (1 + math.exp(-y))) * (1 - (1 / (1 + math.exp(-y))))
 );
 
-export let tanh = new ActivationFunction
+let tanh = new ActivationFunction
 (
     x => math.tanh(x),
     y => 1 - (math.tanh(y) * math.tanh(y))
 );
 
-export let linear = new ActivationFunction
+let linear = new ActivationFunction
 (
     x => x,
     y => y
 );
 
-export class JellyBrain
+class JellyBrain
 {
     constructor(inputNodes, hiddenNodes, outputNodes, learningRate = 0.3, activationFunction = tanh, activationFunctionOutput = tanh)
     {
@@ -138,3 +138,10 @@ export class JellyBrain
         // clone an existing trained brain
     }
 }
+
+exports.JellyBrain = JellyBrain
+exports.lrelu = lrelu
+exports.relu = relu
+exports.sigmoid = sigmoid
+exports.tanh = tanh
+exports.linear = linear

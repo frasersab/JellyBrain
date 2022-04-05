@@ -1,7 +1,7 @@
 // This tests the neural networks ability to predict a simple linear regression
 
-import * as math from 'mathjs';
-import { JellyBrain, tanh, linear } from './JellyBrain.js'
+const math = require('mathjs')
+const {JellyBrain, linear} = require('./JellyBrain.js')
 
 let brain = new JellyBrain(1, 1, 1, undefined, undefined, linear);
 

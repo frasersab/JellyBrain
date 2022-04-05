@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "A simple artificial neural network",
   "main": "./src/JellyBrain.js",
-  "type": "module",
   "scripts": {
     "git-master": "git push -u origin master",
     "git-page": "git subtree push --prefix dist origin gh-pages"
