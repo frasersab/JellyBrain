@@ -1,4 +1,4 @@
-// This tests the neural networks ability to predict a simple linear regression
+// This tests the neural networks ability to predict a multiple linear regression
 
 const math = require('mathjs')
 const {JellyBrain, linear} = require('./JellyBrain.js')

@@ -21,6 +21,15 @@
                 "<node_internals>/**"
             ],
             "program": "${workspaceFolder}\\src\\binaryClassification.js"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch numberIdentifier",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${workspaceFolder}\\src\\numberIdentifier.js"
         }
     ]
 }

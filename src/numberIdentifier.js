@@ -17,7 +17,7 @@ function trainer(brain, amount) {
     })
 }
 
-// training function
+// testing function
 function tester(brain, amount) {
     var pixelValues = readMNIST(0, amount, '\\test_images_10k.idx3-ubyte', '\\test_labels_10k.idx1-ubyte');
     let accuracy = 0;
@@ -36,11 +36,14 @@ function tester(brain, amount) {
     return accuracy = (accuracy / amount) * 100;
 }
 
+let trainAmount = 100;
+let testAmount = 20;
+
 let accuracyTable = Array();
 accuracyTable.push(["Training Samples", "Accuracy"]);
 
-accuracyTable.push([0, tester(brain, 20)]);
-trainer(brain, 20);
-accuracyTable.push([20, tester(brain, 20)]);
+accuracyTable.push([0, tester(brain, testAmount)]);
+trainer(brain, trainAmount);
+accuracyTable.push([trainAmount, tester(brain, testAmount)]);
 
 console.table(accuracyTable);
