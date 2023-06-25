@@ -18,7 +18,7 @@ let errorMeanSquared = new costFunction
 
 let crossEntropy = new costFunction
 (
-    (x,y) => {return math.divide(math.subtract(x,y), math.multiply(math.map(x => 1 -x), x))}
+    (x,y) => {return math.dotDivide(math.subtract(x,y), math.dotMultiply(math.map(x, z => 1 - z), x))}
 )
 
 // activation function class
