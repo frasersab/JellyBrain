@@ -1,7 +1,25 @@
-// This is a simple neural network
+// This is a simple ncostFunctioneural network
 // By Fraser Sabine
 
 const math = require('mathjs')
+
+// cost function class
+class costFunction{
+    constructor(dfunc)
+    {
+        this.dfunc = dfunc;
+    }
+}
+
+let errorMeanSquared = new costFunction
+(
+    (x,y) => {return math.subtract(x,y)}
+)
+
+let crossEntropy = new costFunction
+(
+    (x,y) => {return math.divide(math.subtract(x,y), math.multiply(math.map(x => 1 -x), x))}
+)
 
 // activation function class
 class ActivationFunction
@@ -45,12 +63,13 @@ let linear = new ActivationFunction
 
 class JellyBrain
 {
-    constructor(inputNodes, hiddenNodes, outputNodes, learningRate = 0.3, activationFunction = tanh, activationFunctionOutput = tanh)
+    constructor(inputNodes, hiddenNodes, outputNodes, costFunction = errorMeanSquared, learningRate = 0.3, activationFunction = tanh, activationFunctionOutput = tanh)
     {
         // set the parameteres for the neural network
         this.inputNodes = inputNodes;
         this.hiddenNodes = hiddenNodes;
         this.outputNodes = outputNodes;
+        this.costFunction = costFunction;
         this.learningRate = learningRate;
         this.activation = activationFunction;
         this.activationOutput = activationFunctionOutput;
@@ -98,15 +117,15 @@ class JellyBrain
         // --Backpropogation algorithm--
         // -Layer 1-
         // dc/da(outputs)
-        let dcdao = math.subtract(targets, outputA);
+        let dcdao = this.costFunction.dfunc(targets, outputA);
 
         // da/dz(outputs)
         let dadzo = math.map(outputZ, this.activationOutput.dfunc);
 
-        // dc/dz(outputs) = dc/dao ⊙ da/dzo
+        // dc/dz(outputs) = dc/dao ○ da/dzo (elemnt wise)
         let dcdzo = math.dotMultiply(dcdao, dadzo);
 
-        // dc/dw(outputs) = dzo/dwo(T) * dc/dzo
+        // dc/dw(outputs) = dzo/dwo(T) ⋅ dc/dzo (dot product)
         let dcdwo = math.multiply(math.transpose([hiddenA]), [dcdzo]);
 
         // -Layer 2-
@@ -116,10 +135,10 @@ class JellyBrain
         // da/dz(hidden)
         let dadzh = math.map(hiddenZ, this.activation.dfunc);
 
-        // dc/dz(hidden) = dc/dah ⊙ da/dzh
+        // dc/dz(hidden) = dc/dah ○ da/dzh (element wise)
         let dcdzh = math.dotMultiply(dcdah, dadzh);
 
-        // dc/dw(hidden) = dzh/dwh(T) * dc/dzh
+        // dc/dw(hidden) = dzh/dwh(T) ⋅ dc/dzh (dot product)
         let dcdwh = math.multiply(math.transpose([inputs]), [dcdzh]);
 
         // Update Biases
@@ -153,6 +172,8 @@ class JellyBrain
 }
 
 exports.JellyBrain = JellyBrain
+exports.errorMeanSquared = errorMeanSquared
+exports.crossEntropy = crossEntropy
 exports.lrelu = lrelu
 exports.relu = relu
 exports.sigmoid = sigmoid
