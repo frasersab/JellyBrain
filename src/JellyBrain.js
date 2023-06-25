@@ -101,7 +101,7 @@ class JellyBrain
         let dcdao = math.subtract(targets, outputA);
 
         // da/dz(outputs)
-        let dadzo = math.map(outputZ, this.activation.dfunc);
+        let dadzo = math.map(outputZ, this.activationOutput.dfunc);
 
         // dc/dz(outputs) = dc/dao ⊙ da/dzo
         let dcdzo = math.dotMultiply(dcdao, dadzo);
