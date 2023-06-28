@@ -1,4 +1,4 @@
-// This is a simple ncostFunctioneural network
+// This is a simple neural network
 // By Fraser Sabine
 
 const math = require('mathjs')
@@ -33,19 +33,27 @@ class ActivationFunction
 
 let softmax = new ActivationFunction
 (
-    x => {
+    x =>
+    {
         const maxx = math.max(x);
-        let expx = map(x, z => math.exp(z - maxx));
+        let expx = math.map(x, z => math.exp(z - maxx));
         const sumexpx = math.sum(expx);
-        return map(expx, z => math.divide(z, sumexpx))
+        return math.map(expx, z => math.divide(z, sumexpx))
     },
-    y => {
-        const size = math.size(y);
-        let jac = y;
-        for (let i = 0; i <= size; i++) {
-            jac = math.concat(y)
-        };
-        // TODO finish the derivative
+    y =>
+    {
+        let softy = softmax.func(y)
+        let jacobianDiag = math.diag(softy);
+        let jacobianRow = softy;
+        for (let i = 0; i < (softy.length - 1) ; i++)
+        {
+            jacobianRow = jacobianRow.concat(softy);
+        }
+        jacobianRow = math.reshape(jacobianRow, math.size(jacobianDiag));
+        let jacobianCol = math.transpose(jacobianRow);
+        let jacobiaSub = math.dotMultiply(jacobianRow, jacobianCol);
+        let jacobian = math.subtract(jacobianDiag, jacobiaSub);
+        return jacobian;
     }
 );
 
@@ -201,6 +209,7 @@ class JellyBrain
 exports.JellyBrain = JellyBrain
 exports.errorMeanSquared = errorMeanSquared
 exports.crossEntropy = crossEntropy
+exports.softmax = softmax
 exports.lrelu = lrelu
 exports.relu = relu
 exports.sigmoid = sigmoid
