@@ -31,28 +31,55 @@ class ActivationFunction
     }
 }
 
+let softmax = new ActivationFunction
+(
+    x => {
+        const maxx = math.max(x);
+        let expx = map(x, z => math.exp(z - maxx));
+        const sumexpx = math.sum(expx);
+        return map(expx, z => math.divide(z, sumexpx))
+    },
+    y => {
+        const size = math.size(y);
+        let jac = y;
+        for (let i = 0; i <= size; i++) {
+            jac = math.concat(y)
+        };
+        // TODO finish the derivative
+    }
+);
+
+
 let lrelu = new ActivationFunction
 (
-    x => { if (x < 0) { return 0.1 * x } else { return x } },
-    y => { if (y < 0) { return 0.1 } else { return 1 } }
+    //x => { if (x < 0) { return 0.1 * x } else { return x } },
+    //y => { if (y < 0) { return 0.1 } else { return 1 } }
+    x => {return math.map(x, z => {if (z < 0) { return 0.1 * z } else { return z }})},
+    y => {return math.map(y, z => {if (z < 0) { return 0.1 } else { return 1 }})}  
 );
 
 let relu = new ActivationFunction
 (
-    x => { if (x < 0) { return 0 } else { return x } },
-    y => { if (y <= 0) { return 0 } else { return 1 } }
+    //x => { if (x < 0) { return 0 } else { return x } },
+    //y => { if (y <= 0) { return 0 } else { return 1 } }
+    x => {return math.map(x, z => {if (z < 0) { return 0 } else { return z }})},
+    y => {return math.map(y, z => {if (z <= 0) { return 0 } else { return 1 }})}
 );
 
 let sigmoid = new ActivationFunction
 (
-    x => 1 / (1 + math.exp(-x)),
-    y => (1 / (1 + math.exp(-y))) * (1 - (1 / (1 + math.exp(-y))))
+    //x => 1 / (1 + math.exp(-x)),
+    //y => (1 / (1 + math.exp(-y))) * (1 - (1 / (1 + math.exp(-y))))
+    x => {return math.map(x, z => {1 / (1 + math.exp(-z))})},
+    y => {return math.map(y, (1 / (1 + math.exp(-z))) * (1 - (1 / (1 + math.exp(-z)))))}
 );
 
 let tanh = new ActivationFunction
 (
-    x => math.tanh(x),
-    y => 1 - (math.tanh(y) * math.tanh(y))
+    //x => math.tanh(x),
+    //y => 1 - (math.tanh(y) * math.tanh(y))
+    x => {return math.map(x, z => math.tanh(z))},
+    y => {return math.map(y, z => 1 - (math.tanh(z) * math.tanh(z)))}
 );
 
 let linear = new ActivationFunction
@@ -63,7 +90,7 @@ let linear = new ActivationFunction
 
 class JellyBrain
 {
-    constructor(inputNodes, hiddenNodes, outputNodes, costFunction = errorMeanSquared, learningRate = 0.3, activationFunction = tanh, activationFunctionOutput = tanh)
+    constructor(inputNodes, hiddenNodes, outputNodes, costFunction = errorMeanSquared, learningRate = 0.3, activationFunction = sigmoid, activationFunctionOutput = sigmoid)
     {
         // set the parameteres for the neural network
         this.inputNodes = inputNodes;
@@ -93,11 +120,11 @@ class JellyBrain
         // --Feedforward algorithm--
         // generate hidden layer Z and A
         let hiddenZ = math.add(math.multiply(inputs, this.weightsIH), this.biasH);
-        let hiddenA = math.map(hiddenZ, this.activation.func);
+        let hiddenA = this.activation.func(hiddenZ);
 
         // generate outputs Z and A
         let outputZ = math.add(math.multiply(hiddenA, this.weightsHO), this.biasO);
-        let outputA = math.map(outputZ, this.activationOutput.func);
+        let outputA = this.activationOutput.func(outputZ);
 
         // send back array of outputs
         return outputA;
@@ -108,11 +135,11 @@ class JellyBrain
         // --Feedforward algorithm--
         // generate hidden layer Z and A
         let hiddenZ = math.add(math.multiply(inputs, this.weightsIH), this.biasH);
-        let hiddenA = math.map(hiddenZ, this.activation.func);
+        let hiddenA = this.activation.func(hiddenZ);
 
         // generate outputs Z and A
         let outputZ = math.add(math.multiply(hiddenA, this.weightsHO), this.biasO);
-        let outputA = math.map(outputZ, this.activationOutput.func);
+        let outputA = this.activationOutput.func(outputZ);
 
         // --Backpropogation algorithm--
         // -Layer 1-
@@ -120,7 +147,7 @@ class JellyBrain
         let dcdao = this.costFunction.dfunc(targets, outputA);
 
         // da/dz(outputs)
-        let dadzo = math.map(outputZ, this.activationOutput.dfunc);
+        let dadzo = this.activationOutput.dfunc(outputZ);
 
         // dc/dz(outputs) = dc/dao ○ da/dzo (elemnt wise)
         let dcdzo = math.dotMultiply(dcdao, dadzo);
@@ -133,7 +160,7 @@ class JellyBrain
         let dcdah = math.multiply(dcdzo, math.transpose(this.weightsHO));
 
         // da/dz(hidden)
-        let dadzh = math.map(hiddenZ, this.activation.dfunc);
+        let dadzh = this.activation.dfunc(hiddenZ);
 
         // dc/dz(hidden) = dc/dah ○ da/dzh (element wise)
         let dcdzh = math.dotMultiply(dcdah, dadzh);
