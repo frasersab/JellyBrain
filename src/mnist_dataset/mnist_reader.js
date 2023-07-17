@@ -1,7 +1,7 @@
 var fs = require('fs');
 const {createCanvas} = require('canvas');
 
-function readMNIST(start, end, imageFile, labelFile)
+function readMNIST(start, end, imageFile, labelFile, squished = false)
 {
     var dataFileBuffer = fs.readFileSync(__dirname + imageFile);
     var labelFileBuffer = fs.readFileSync(__dirname + labelFile);
@@ -14,7 +14,12 @@ function readMNIST(start, end, imageFile, labelFile)
         {
             for (var x = 0; x <= 27; x++)
             {
-                pixels.push(dataFileBuffer[(image * 28 * 28) + (x + (y * 28)) + 16]);
+                value = dataFileBuffer[(image * 28 * 28) + (x + (y * 28)) + 16];
+                if (squished)
+                {
+                    value = value / 255;
+                }
+                pixels.push(value);
             }
         }
 

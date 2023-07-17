@@ -3,29 +3,64 @@
 
 const math = require('mathjs')
 
+// enumerations
+const costFuncNames = Object.freeze(
+{
+    errorSquared: Symbol(0),
+    crossEntropy: Symbol(1),
+    binaryCrossEntropy: Symbol(2)
+})
+
+const activationFuncNames = Object.freeze(
+{
+    softmax: Symbol(0),
+    lrelu: Symbol(1),
+    relu: Symbol(2),
+    sigmoid: Symbol(3),
+    tanh: Symbol(4),
+    linear: Symbol(5)
+})
+
+const functionTypes = Object.freeze(
+{
+    vector: Symbol(0),
+    scalar: Symbol(1)
+})
+
 // cost function class
 class costFunction{
-    constructor(dfunc)
+    constructor(name, dfunc)
     {
+        this.name = name;
         this.dfunc = dfunc;
     }
 }
 
-let errorMeanSquared = new costFunction
+let errorSquared = new costFunction
 (
+    costFuncNames.errorSquared,
     (x,y) => {return math.subtract(x,y)}
 )
 
 let crossEntropy = new costFunction
 (
-    (x,y) => {return math.dotDivide(math.subtract(x,y), math.dotMultiply(math.map(x, z => 1 - z), x))}
+    costFuncNames.crossEntropy,
+    (x,y) => {return math.dotDivide(x,y)}
+)
+
+let binaryCrossEntropy = new costFunction
+(
+    costFuncNames.binaryCrossEntropy,
+    (x,y) => {return math.dotDivide(x, math.dotMultiply(y, math.log(2)))}
 )
 
 // activation function class
 class ActivationFunction
 {
-    constructor(func, dfunc)
+    constructor(name, functionType, func, dfunc)
     {
+        this.name = name;
+        this.functionType = functionType;
         this.func = func;
         this.dfunc = dfunc;
     }
@@ -33,6 +68,8 @@ class ActivationFunction
 
 let softmax = new ActivationFunction
 (
+    activationFuncNames.softmax,
+    functionTypes.vector,
     x =>
     {
         const maxx = math.max(x);
@@ -60,45 +97,66 @@ let softmax = new ActivationFunction
 
 let lrelu = new ActivationFunction
 (
-    //x => { if (x < 0) { return 0.1 * x } else { return x } },
-    //y => { if (y < 0) { return 0.1 } else { return 1 } }
+    activationFuncNames.lrelu,
+    functionTypes.scalar,
     x => {return math.map(x, z => {if (z < 0) { return 0.1 * z } else { return z }})},
     y => {return math.map(y, z => {if (z < 0) { return 0.1 } else { return 1 }})}  
 );
 
 let relu = new ActivationFunction
 (
-    //x => { if (x < 0) { return 0 } else { return x } },
-    //y => { if (y <= 0) { return 0 } else { return 1 } }
+    activationFuncNames.relu,
+    functionTypes.scalar,
     x => {return math.map(x, z => {if (z < 0) { return 0 } else { return z }})},
     y => {return math.map(y, z => {if (z <= 0) { return 0 } else { return 1 }})}
 );
 
 let sigmoid = new ActivationFunction
 (
-    //x => 1 / (1 + math.exp(-x)),
-    //y => (1 / (1 + math.exp(-y))) * (1 - (1 / (1 + math.exp(-y))))
-    x => {return math.map(x, z => {1 / (1 + math.exp(-z))})},
-    y => {return math.map(y, (1 / (1 + math.exp(-z))) * (1 - (1 / (1 + math.exp(-z)))))}
+    activationFuncNames.sigmoid,
+    functionTypes.scalar,
+    x => {return math.map(x, z => 1 / (1 + math.exp(-z)))},
+    y => {return math.map(y, z => (1 / (1 + math.exp(-z))) * (1 - (1 / (1 + math.exp(-z)))) )}
 );
 
 let tanh = new ActivationFunction
 (
-    //x => math.tanh(x),
-    //y => 1 - (math.tanh(y) * math.tanh(y))
+    activationFuncNames.tanh,
+    functionTypes.scalar,
     x => {return math.map(x, z => math.tanh(z))},
     y => {return math.map(y, z => 1 - (math.tanh(z) * math.tanh(z)))}
 );
 
 let linear = new ActivationFunction
 (
+    activationFuncNames.linear,
+    functionTypes.scalar,
     x => x,
     y => y
 );
 
+// Dictionary of cost functions
+const costFuncs = Object.freeze(
+{
+    errorSquared: errorSquared,
+    crossEntropy: crossEntropy,
+    binaryCrossEntropy: binaryCrossEntropy
+})
+
+// Dictionary of activation functions
+const activationFuncs = Object.freeze(
+{
+    softmax: softmax,
+    lrelu: lrelu,
+    relu: relu,
+    sigmoid: sigmoid,
+    tanh: tanh,
+    linear: linear
+})
+
 class JellyBrain
 {
-    constructor(inputNodes, hiddenNodes, outputNodes, costFunction = errorMeanSquared, learningRate = 0.3, activationFunction = sigmoid, activationFunctionOutput = sigmoid)
+    constructor(inputNodes, hiddenNodes, outputNodes, costFunction = errorSquared, learningRate = 0.3, activationFunction = sigmoid, activationFunctionOutput = sigmoid)
     {
         // set the parameteres for the neural network
         this.inputNodes = inputNodes;
@@ -125,7 +183,7 @@ class JellyBrain
 
     guess(inputs)
     {
-        // --Feedforward algorithm--
+        // --Feedforward algorithm-- 
         // generate hidden layer Z and A
         let hiddenZ = math.add(math.multiply(inputs, this.weightsIH), this.biasH);
         let hiddenA = this.activation.func(hiddenZ);
@@ -141,7 +199,7 @@ class JellyBrain
     train(inputs, targets)
     {
         // --Feedforward algorithm--
-        // generate hidden layer Z and A
+        // generate hidden layer Z and A       
         let hiddenZ = math.add(math.multiply(inputs, this.weightsIH), this.biasH);
         let hiddenA = this.activation.func(hiddenZ);
 
@@ -151,20 +209,43 @@ class JellyBrain
 
         // --Backpropogation algorithm--
         // -Layer 1-
-        // dc/da(outputs)
-        let dcdao = this.costFunction.dfunc(targets, outputA);
+        let dcdao;
+        let dadzo;
+        let dcdzo;
 
-        // da/dz(outputs)
-        let dadzo = this.activationOutput.dfunc(outputZ);
+        if (this.activationOutput.name == activationFuncNames.softmax && this.costFunction.name == costFuncNames.crossEntropy)
+        {
+            // when softmax and cross entropy is used together the dc/dz(outputs) calculation can be greatly simplified
+            // dc/dz(outputs)
+            dcdzo = math.subtract(outputA, targets);
+        }
+        else
+        {
+            // dc/da(outputs)
+            dcdao = this.costFunction.dfunc(targets, outputA);
 
-        // dc/dz(outputs) = dc/dao ○ da/dzo (elemnt wise)
-        let dcdzo = math.dotMultiply(dcdao, dadzo);
+            // TODO: give activationOutput.dfunc abiity to cheat and use outputA as the dfunc uses the func for sigmoid and softmax
+            // da/dz(outputs)
+            dadzo = this.activationOutput.dfunc(outputZ);
+
+            // dc/dz(outputs) is calculated differently depending on if the activationOutput is a scalar or vector function
+            if(this.activationOutput.functionType == functionTypes.scalar)
+            {
+                // dc/dz(outputs) = dc/dao ○ da/dzo (elemnt wise)
+                dcdzo = math.dotMultiply(dcdao, dadzo);
+            }
+            else
+            {
+                // dc/dz(outputs) = dc/dao(T) ⋅ da/dzo (dot product)
+                dcdzo = math.multiply([math.transpose(dcdao)], dadzo);
+            }
+        }
 
         // dc/dw(outputs) = dzo/dwo(T) ⋅ dc/dzo (dot product)
         let dcdwo = math.multiply(math.transpose([hiddenA]), [dcdzo]);
 
-        // -Layer 2-
-        // dc/da(hidden)
+        // -Layer 2- 
+        // dc/da(hidden) = dc/dz(outputs) ⋅ dz/da(hidden)(T)
         let dcdah = math.multiply(dcdzo, math.transpose(this.weightsHO));
 
         // da/dz(hidden)
@@ -176,13 +257,13 @@ class JellyBrain
         // dc/dw(hidden) = dzh/dwh(T) ⋅ dc/dzh (dot product)
         let dcdwh = math.multiply(math.transpose([inputs]), [dcdzh]);
 
-        // Update Biases
-        this.biasO = math.add(this.biasO, math.multiply(dcdzo, this.learningRate));
-        this.biasH = math.add(this.biasH, math.multiply(dcdzh, this.learningRate));
+        // Update biases
+        this.biasO = math.subtract(this.biasO, math.multiply(dcdzo, this.learningRate));
+        this.biasH = math.subtract(this.biasH, math.multiply(dcdzh, this.learningRate));
 
         // Update weights
-        this.weightsHO = math.add(this.weightsHO, math.multiply(dcdwo, this.learningRate));
-        this.weightsIH = math.add(this.weightsIH, math.multiply(dcdwh, this.learningRate));
+        this.weightsHO = math.subtract(this.weightsHO, math.multiply(dcdwo, this.learningRate));
+        this.weightsIH = math.subtract(this.weightsIH, math.multiply(dcdwh, this.learningRate));
 
         return dcdao;
     }
@@ -207,11 +288,5 @@ class JellyBrain
 }
 
 exports.JellyBrain = JellyBrain
-exports.errorMeanSquared = errorMeanSquared
-exports.crossEntropy = crossEntropy
-exports.softmax = softmax
-exports.lrelu = lrelu
-exports.relu = relu
-exports.sigmoid = sigmoid
-exports.tanh = tanh
-exports.linear = linear
+exports.costFuncs = costFuncs
+exports.activationFuncs = activationFuncs
