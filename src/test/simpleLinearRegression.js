@@ -1,16 +1,15 @@
-// This tests the neural networks ability to predict a multiple linear regression
+// This tests the neural networks ability to predict a simple linear regression
 
 const math = require('mathjs')
-const {JellyBrain, linear} = require('./JellyBrain.js')
+const {JellyBrain, linear} = require('../JellyBrain.js')
 
-let brain = new JellyBrain(2, 2, 1, undefined, undefined, linear);
+let brain = new JellyBrain(1, 1, 1, undefined, undefined, linear);
 
 // line function
-function y(a, b) {
-    return (2 * a) + (3 * b);
+function y(x) {
+    return 2 * x;
 }
 
-// todo: get adjusted r squared
 // r squared function
 function rsquared(actual, guess) {
     const avarage = actual.reduce((prev, curr) => prev + curr) / actual.length;
@@ -34,8 +33,8 @@ function trainer(brain, amount) {
     let targets = Array(amount);
 
     for (let i = 0; i < amount; i++) {
-        inputs[i] = [Math.random(), Math.random()];
-        targets[i] = y(inputs[i][0], inputs[i][1])
+        inputs[i] = [Math.random()];
+        targets[i] = y(inputs[i])
         brain.train(inputs[i], targets[i]);
     }
 }
@@ -47,8 +46,8 @@ function tester(brain, amount) {
     let guess = Array(amount);
 
     for (let i = 0; i < amount; i++) {
-        inputs[i] = [Math.random(), Math.random()];
-        targets[i] = y(inputs[i][0], inputs[i][1])
+        inputs[i] = [Math.random()];
+        targets[i] = y(inputs[i]);
         guess[i] = brain.guess(inputs[i])[0];
     }
 

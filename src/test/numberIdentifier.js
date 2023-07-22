@@ -1,7 +1,7 @@
 const math = require('mathjs');
-const {JellyBrain, costFuncs, activationFuncs} = require('./JellyBrain.js');
-const {readMNIST, saveMNIST} = require('./mnist_dataset/mnist_reader');
-var fs = require('fs');
+const {JellyBrain, costFuncs, activationFuncs} = require('../JellyBrain.js');
+const {readMNIST, saveMNIST} = require('../mnist_dataset/mnist_reader.js');
+const fs = require('fs');
 const cliProgress = require('cli-progress');
 
 
