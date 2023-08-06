@@ -179,54 +179,54 @@ class JellyBrain
         this.biasH = math.zeros(this.hiddenNodes).toArray();
         this.biasO = math.zeros(this.outputNodes).toArray();
 
+        // feedforward variables
+        let hiddenZ = 0;
+        let hiddenA = 0;
+        let outputZ = 0;
+        let outputA = 0;
+
+        // backprop variables
+        let batchSize = 0;
     }
 
     guess(inputs)
     {
-        // --Feedforward algorithm-- 
         // generate hidden layer Z and A
-        let hiddenZ = math.add(math.multiply(inputs, this.weightsIH), this.biasH);
-        let hiddenA = this.activation.func(hiddenZ);
+        this.hiddenZ = math.add(math.multiply(inputs, this.weightsIH), this.biasH);
+        this.hiddenA = this.activation.func(this.hiddenZ);
 
         // generate outputs Z and A
-        let outputZ = math.add(math.multiply(hiddenA, this.weightsHO), this.biasO);
-        let outputA = this.activationOutput.func(outputZ);
+        this.outputZ = math.add(math.multiply(this.hiddenA, this.weightsHO), this.biasO);
+        this.outputA = this.activationOutput.func(this.outputZ);
 
         // send back array of outputs
-        return outputA;
+        return this.outputA;
     }
 
     train(inputs, targets)
     {
-        // --Feedforward algorithm--
-        // generate hidden layer Z and A       
-        let hiddenZ = math.add(math.multiply(inputs, this.weightsIH), this.biasH);
-        let hiddenA = this.activation.func(hiddenZ);
+        guess(inputs);
 
-        // generate outputs Z and A
-        let outputZ = math.add(math.multiply(hiddenA, this.weightsHO), this.biasO);
-        let outputA = this.activationOutput.func(outputZ);
-
-        // --Backpropogation algorithm--
-        // -Layer 1-
+        // --backpropogation algorithm--
+        // -output layer-
         let dcdao;
         let dadzo;
         let dcdzo;
 
+        // when softmax and cross entropy are used together the dc/dz(outputs) calculation can be greatly simplified
         if (this.activationOutput.name == activationFuncNames.softmax && this.costFunction.name == costFuncNames.crossEntropy)
         {
-            // when softmax and cross entropy is used together the dc/dz(outputs) calculation can be greatly simplified
-            // dc/dz(outputs)
-            dcdzo = math.subtract(outputA, targets);
+            // dc/dz(outputs) = outputA - targets
+            dcdzo = math.subtract(this.outputA, targets);
         }
         else
         {
             // dc/da(outputs)
-            dcdao = this.costFunction.dfunc(targets, outputA);
+            dcdao = this.costFunction.dfunc(targets, this.outputA);
 
             // TODO: give activationOutput.dfunc abiity to cheat and use outputA as the dfunc uses the func for sigmoid and softmax
             // da/dz(outputs)
-            dadzo = this.activationOutput.dfunc(outputZ);
+            dadzo = this.activationOutput.dfunc(this.outputZ);
 
             // dc/dz(outputs) is calculated differently depending on if the activationOutput is a scalar or vector function
             if(this.activationOutput.functionType == functionTypes.scalar)
@@ -242,14 +242,14 @@ class JellyBrain
         }
 
         // dc/dw(outputs) = dzo/dwo(T) ⋅ dc/dzo (dot product)
-        let dcdwo = math.multiply(math.transpose([hiddenA]), [dcdzo]);
+        let dcdwo = math.multiply(math.transpose([this.hiddenA]), [dcdzo]);
 
-        // -Layer 2- 
+        // -hidden layer- 
         // dc/da(hidden) = dc/dz(outputs) ⋅ dz/da(hidden)(T)
         let dcdah = math.multiply(dcdzo, math.transpose(this.weightsHO));
 
         // da/dz(hidden)
-        let dadzh = this.activation.dfunc(hiddenZ);
+        let dadzh = this.activation.dfunc(this.hiddenZ);
 
         // dc/dz(hidden) = dc/dah ○ da/dzh (element wise)
         let dcdzh = math.dotMultiply(dcdah, dadzh);
