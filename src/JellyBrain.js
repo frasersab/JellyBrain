@@ -205,7 +205,7 @@ class JellyBrain
 
     train(inputs, targets)
     {
-        guess(inputs);
+        this.guess(inputs);
 
         // --backpropogation algorithm--
         // -output layer-
