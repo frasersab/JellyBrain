@@ -168,8 +168,8 @@ class JellyBrain
         this.activationOutput = activationFunctionOutput;
 
         // find the optimal range to initialise the weights to prevent saturation
-        let initIHRange = 1 / math.sqrt(this.hiddenNodes);
-        let initHORange = 1 / math.sqrt(this.outputNodes);
+        this.initIHRange = 1 / math.sqrt(this.hiddenNodes);
+        this.initHORange = 1 / math.sqrt(this.outputNodes);
 
         // create the weights matrix with random weights within the specified range
         this.weightsIH = math.random([this.inputNodes, this.hiddenNodes], -initIHRange, initIHRange);
@@ -180,13 +180,14 @@ class JellyBrain
         this.biasO = math.zeros(this.outputNodes).toArray();
 
         // feedforward variables
-        let hiddenZ = 0;
-        let hiddenA = 0;
-        let outputZ = 0;
-        let outputA = 0;
+        this.hiddenZ;
+        this.hiddenA;
+        this.outputZ;
+        this.outputA;
 
         // backprop variables
-        let batchSize = 0;
+        this.batchSize = 0;
+        this.cost = 0;
     }
 
     guess(inputs)
@@ -201,6 +202,23 @@ class JellyBrain
 
         // send back array of outputs
         return this.outputA;
+    }
+
+    addToBatch(inputs, targets)
+    {
+        this.guess(inputs);
+        batchSize++;
+        
+        // when softmax and cross entropy are used together the dc/dz(outputs) calculation can be greatly simplified
+        if (this.activationOutput.name == activationFuncNames.softmax && this.costFunction.name == costFuncNames.crossEntropy)
+        {
+            // dc/dz(outputs) = outputA - targets
+            dcdzo = math.subtract(this.outputA, targets);
+        }
+        else
+        {
+            // dc/da(outputs)
+            dcdao = this.costFunction.dfunc(targets, this.outputA);
     }
 
     train(inputs, targets)
@@ -224,7 +242,7 @@ class JellyBrain
             // dc/da(outputs)
             dcdao = this.costFunction.dfunc(targets, this.outputA);
 
-            // TODO: give activationOutput.dfunc abiity to cheat and use outputA as the dfunc uses the func for sigmoid and softmax
+            // TODO: give activationOutput.dfunc abiity to cheat and use outputA as the dfunc uses the func for sigmoid and others
             // da/dz(outputs)
             dadzo = this.activationOutput.dfunc(this.outputZ);
 
