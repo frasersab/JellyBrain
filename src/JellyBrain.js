@@ -156,6 +156,16 @@ const activationFuncs = Object.freeze(
 
 class JellyBrain
 {
+    #hiddenZ;
+    #hiddenA;
+    #outputZ;
+    #outputA;
+    #batchSize;
+    #weightsIHChange;
+    #weightsHOChange;
+    #biasIHChange;
+    #biasHOChange;
+
     constructor(inputNodes, hiddenNodes, outputNodes, costFunction = errorSquared, learningRate = 0.3, activationFunction = sigmoid, activationFunctionOutput = sigmoid)
     {
         // set the parameteres for the neural network
@@ -168,83 +178,115 @@ class JellyBrain
         this.activationOutput = activationFunctionOutput;
 
         // find the optimal range to initialise the weights to prevent saturation
-        this.initIHRange = 1 / math.sqrt(this.hiddenNodes);
-        this.initHORange = 1 / math.sqrt(this.outputNodes);
+        let initIHRange = 1 / math.sqrt(this.hiddenNodes);
+        let initHORange = 1 / math.sqrt(this.outputNodes);
 
         // create the weights matrix with random weights within the specified range
         this.weightsIH = math.random([this.inputNodes, this.hiddenNodes], -initIHRange, initIHRange);
         this.weightsHO = math.random([this.hiddenNodes, this.outputNodes], -initHORange, initHORange);
 
         // create bias arrays with initialisation to 0
-        this.biasH = math.zeros(this.hiddenNodes).toArray();
-        this.biasO = math.zeros(this.outputNodes).toArray();
+        this.biasIH = math.zeros(this.hiddenNodes).toArray();
+        this.biasHO = math.zeros(this.outputNodes).toArray();
 
         // feedforward variables
-        this.hiddenZ;
-        this.hiddenA;
-        this.outputZ;
-        this.outputA;
+        this.#hiddenZ;
+        this.#hiddenA;
+        this.#outputZ;
+        this.#outputA;
 
-        // backprop variables
-        this.batchSize = 0;
-        this.cost = 0;
+        // backpropigation variables
+        this.#batchSize = 0;
+        this.#weightsIHChange = math.zeros(math.size(this.weightsIH));
+        this.#weightsHOChange = math.zeros(math.size(this.weightsHO));
+        this.#biasIHChange = math.zeros(this.biasIH.length).toArray();
+        this.#biasHOChange = math.zeros(this.biasHO.length).toArray();
     }
 
-    guess(inputs)
+    guess(input)
     {
         // generate hidden layer Z and A
-        this.hiddenZ = math.add(math.multiply(inputs, this.weightsIH), this.biasH);
-        this.hiddenA = this.activation.func(this.hiddenZ);
+        this.#hiddenZ = math.add(math.multiply(input, this.weightsIH), this.biasIH);
+        this.#hiddenA = this.activation.func(this.#hiddenZ);
 
         // generate outputs Z and A
-        this.outputZ = math.add(math.multiply(this.hiddenA, this.weightsHO), this.biasO);
-        this.outputA = this.activationOutput.func(this.outputZ);
+        this.#outputZ = math.add(math.multiply(this.#hiddenA, this.weightsHO), this.biasHO);
+        this.#outputA = this.activationOutput.func(this.#outputZ);
 
         // send back array of outputs
-        return this.outputA;
+        return this.#outputA;
     }
 
-    addToBatch(inputs, targets)
+    addToBatch(input, target)
     {
-        this.guess(inputs);
-        batchSize++;
-        
-        // when softmax and cross entropy are used together the dc/dz(outputs) calculation can be greatly simplified
-        if (this.activationOutput.name == activationFuncNames.softmax && this.costFunction.name == costFuncNames.crossEntropy)
-        {
-            // dc/dz(outputs) = outputA - targets
-            dcdzo = math.subtract(this.outputA, targets);
+        this.guess(input);
+        this.#backprop(input, target);
+        this.#batchSize++;
+    }
+
+    computeBatch()
+    {
+        if (this.#batchSize >= 1)
+        {       
+            // Update biases
+            this.biasHO = math.subtract(this.biasHO, this.#biasHOChange);
+            this.biasIH = math.subtract(this.biasIH, this.#biasIHChange);
+
+            // Update weights
+            this.weightsHO = math.subtract(this.weightsHO, this.#weightsHOChange);
+            this.weightsIH = math.subtract(this.weightsIH, this.#weightsIHChange);
+            this.clearBatch();
         }
         else
         {
-            // dc/da(outputs)
-            dcdao = this.costFunction.dfunc(targets, this.outputA);
+            console.warn("No batches to compute, nothing will happen");
+        }
     }
 
-    train(inputs, targets)
+    clearBatch()
     {
-        this.guess(inputs);
+        this.#batchSize = 0;
+        this.#weightsIHChange = math.zeros(math.size(this.weightsIH));
+        this.#weightsHOChange = math.zeros(math.size(this.weightsHO));
+        this.#biasIHChange = math.zeros(this.biasIH.length).toArray();
+        this.#biasHOChange = math.zeros(this.biasHO.length).toArray();
+    }
 
-        // --backpropogation algorithm--
-        // -output layer-
+    train(input, target)
+    {
+        if (this.#batchSize >= 1)
+        {
+            console.warn("Discarding current batch to train single example");
+        }
+        else
+        {
+            this.clearBatch();
+            this.addToBatch(input, target);
+            this.computeBatch();
+        }
+    }
+
+    #backprop(input, target)
+    {
+        let dcdzo;
         let dcdao;
         let dadzo;
-        let dcdzo;
 
+        // -Output layer-
         // when softmax and cross entropy are used together the dc/dz(outputs) calculation can be greatly simplified
         if (this.activationOutput.name == activationFuncNames.softmax && this.costFunction.name == costFuncNames.crossEntropy)
         {
-            // dc/dz(outputs) = outputA - targets
-            dcdzo = math.subtract(this.outputA, targets);
+            // dc/dz(outputs) = #outputA - target
+            dcdzo = [math.subtract(this.#outputA, target)];
         }
         else
         {
             // dc/da(outputs)
-            dcdao = this.costFunction.dfunc(targets, this.outputA);
+            dcdao = this.costFunction.dfunc(target, this.#outputA);
 
-            // TODO: give activationOutput.dfunc abiity to cheat and use outputA as the dfunc uses the func for sigmoid and others
+            // TODO: give activationOutput.dfunc abiity to cheat and use #outputA as the dfunc uses the func for sigmoid and softmax
             // da/dz(outputs)
-            dadzo = this.activationOutput.dfunc(this.outputZ);
+            dadzo = this.activationOutput.dfunc(this.#outputZ);
 
             // dc/dz(outputs) is calculated differently depending on if the activationOutput is a scalar or vector function
             if(this.activationOutput.functionType == functionTypes.scalar)
@@ -260,30 +302,28 @@ class JellyBrain
         }
 
         // dc/dw(outputs) = dzo/dwo(T) ⋅ dc/dzo (dot product)
-        let dcdwo = math.multiply(math.transpose([this.hiddenA]), [dcdzo]);
+        let dcdwo = math.multiply(math.transpose([this.#hiddenA]), dcdzo);
 
-        // -hidden layer- 
+        // -Hidden layer- 
         // dc/da(hidden) = dc/dz(outputs) ⋅ dz/da(hidden)(T)
         let dcdah = math.multiply(dcdzo, math.transpose(this.weightsHO));
 
         // da/dz(hidden)
-        let dadzh = this.activation.dfunc(this.hiddenZ);
+        let dadzh = [this.activation.dfunc(this.#hiddenZ)];
 
         // dc/dz(hidden) = dc/dah ○ da/dzh (element wise)
         let dcdzh = math.dotMultiply(dcdah, dadzh);
 
         // dc/dw(hidden) = dzh/dwh(T) ⋅ dc/dzh (dot product)
-        let dcdwh = math.multiply(math.transpose([inputs]), [dcdzh]);
+        let dcdwh = math.multiply(math.transpose([input]), dcdzh);
 
         // Update biases
-        this.biasO = math.subtract(this.biasO, math.multiply(dcdzo, this.learningRate));
-        this.biasH = math.subtract(this.biasH, math.multiply(dcdzh, this.learningRate));
+        this.#biasHOChange = math.subtract(this.#biasHOChange, math.multiply(math.squeeze(dcdzo), this.learningRate));
+        this.#biasIHChange = math.subtract(this.#biasIHChange, math.multiply(math.squeeze(dcdzh), this.learningRate));
 
         // Update weights
-        this.weightsHO = math.subtract(this.weightsHO, math.multiply(dcdwo, this.learningRate));
-        this.weightsIH = math.subtract(this.weightsIH, math.multiply(dcdwh, this.learningRate));
-
-        return dcdao;
+        this.#weightsHOChange = math.subtract(this.#weightsHOChange, math.multiply(math.squeeze(dcdwo), this.learningRate));
+        this.#weightsIHChange = math.subtract(this.#weightsIHChange, math.multiply(math.squeeze(dcdwh), this.learningRate));
     }
 
     exportBrain()
@@ -291,8 +331,8 @@ class JellyBrain
         var brainExport = {};
         brainExport["weightsIH"] = this.weightsIH;
         brainExport["weightsHO"] = this.weightsHO;
-        brainExport["biasH"] = this.biasH;
-        brainExport["biasO"] = this.biasO;
+        brainExport["biasH"] = this.biasIH;
+        brainExport["biasO"] = this.biasHO;
         return brainExport;
     }
 
@@ -300,8 +340,8 @@ class JellyBrain
     {
         this.weightsIH = brainImport.weightsIH;
         this.weightsHO = brainImport.weightsHO;
-        this.biasH = brainImport.biasH;
-        this.biasO = brainImport.biasO;
+        this.biasIH = brainImport.biasH;
+        this.biasHO = brainImport.biasO;
     }
 }
 

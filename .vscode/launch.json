@@ -29,7 +29,7 @@
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}\\src\\numberIdentifier.js"
+            "program": "${workspaceFolder}\\src\\test\\numberIdentifier.js"
         }
     ]
 }

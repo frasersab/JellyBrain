@@ -6,7 +6,7 @@ const fs = require('fs');
 const cliProgress = require('cli-progress');
 
 
-let brain = new JellyBrain(784, 784, 10, costFuncs.crossEntropy, 0.0005, activationFuncs.sigmoid, activationFuncs.softmax);
+let brain = new JellyBrain(784, 784, 10, costFuncs.crossEntropy, 0.001, activationFuncs.sigmoid, activationFuncs.softmax);
 
 // save brain
 function saveBrain(brain, name)
@@ -24,19 +24,25 @@ function loadBrain(brain, name)
     brain.importBrain(contents);
 }
 
+
 // training function
-function trainer(brain, amount, start = 0) {
-    var pixelValues = readMNIST(start, start + amount, '\\train_images_60k.idx3-ubyte', '\\train_labels_60k.idx1-ubyte', true);
+function trainer(brain, numberOfBatches, batchSize = 1, start = 0) {
     const progressBar = new cliProgress.SingleBar({format: 'Training Progress |' + '{bar}' + '| {percentage}% | {value}/{total} | ETA: {eta}s'}, cliProgress.Presets.shades_classic);
-    progressBar.start(amount, 0);
-    
-    pixelValues.forEach(function(image)
+    progressBar.start(numberOfBatches * batchSize, 0);
+
+    for (let batchNumber = 0; batchNumber < numberOfBatches; batchNumber++)
     {
-        targetArray = new Array(10).fill(0);
-        targetArray[image.label] = 1;
-        brain.train(image.pixels, targetArray);
-        progressBar.increment();
-    })
+        let batchStart = start + (batchNumber * batchSize);
+        let pixelValues = readMNIST(batchStart, batchStart + batchSize, '\\train_images_60k.idx3-ubyte', '\\train_labels_60k.idx1-ubyte', true);
+        pixelValues.forEach(function(image)
+        {
+            targetArray = new Array(10).fill(0);
+            targetArray[image.label] = 1;
+            brain.addToBatch(image.pixels, targetArray);
+            progressBar.increment();
+        })
+        brain.computeBatch();
+    }
     progressBar.stop();
 }
 
@@ -63,20 +69,21 @@ function tester(brain, amount, start = 0) {
     return accuracy = (accuracy / amount) * 100;
 }
 
-let startFrom = 21000;
-let trainAmount = 1000;
-let testAmount = 2000;
+let numberOfBatches = 5;
+let batchSize = 10;
+let startFrom = 0;
+let testAmount = 50;
 
 //saveBrain(brain, "brain_before");
-loadBrain(brain, "brain21000")
+//loadBrain(brain, "brain21000")
+
 
 let accuracyTable = Array();
 accuracyTable.push(["Training Samples", "Accuracy"]);
-
 accuracyTable.push([0, tester(brain, testAmount) + "%"]);
-//trainer(brain, trainAmount, startFrom);
-//accuracyTable.push([trainAmount, tester(brain, testAmount) + "%"]);
+trainer(brain, numberOfBatches, batchSize, startFrom);
+accuracyTable.push([numberOfBatches * batchSize, tester(brain, testAmount) + "%"]);
 
-saveBrain(brain, "brain22000");
+saveBrain(brain, "brainBatchTest");
 
 console.table(accuracyTable);
