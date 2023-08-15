@@ -23,11 +23,11 @@ const {JellyBrain, costFuncs, activationFuncs} = require('../JellyBrain.js');
 let brain = new JellyBrain(784, 784, 10, costFuncs.crossEntropy, 0.001, activationFuncs.sigmoid, activationFuncs.softmax);
 let simpleBrain = new JellyBrain(2, 2, 1);
 
-brain.addToBatch([0.2, 0.5], 1);
-brain.addToBatch([0.6, 0.4], 0.7);
-brain.addToBatch([0.1, 0.2], 0.2);
-brain.computeBatch();
-brain.guess([0.1, 0.6]);
+simpleBrain.addToBatch([0.2, 0.5], 1);
+simpleBrain.addToBatch([0.6, 0.4], 0.7);
+simpleBrain.addToBatch([0.1, 0.2], 0.2);
+simpleBrain.computeBatch();
+simpleBrain.guess([0.1, 0.6]);
 ```
 
 ## License
