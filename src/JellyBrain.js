@@ -256,7 +256,7 @@ class JellyBrain
     {
         if (this.#batchSize >= 1)
         {
-            console.warn("Discarding current batch to train single example");
+            console.warn("Please compute or discard current batch to train single example");
         }
         else
         {
