@@ -5,7 +5,7 @@ function readMNIST(start, end, imageFile, labelFile, squished = false)
 {
     var dataFileBuffer = fs.readFileSync(__dirname + imageFile);
     var labelFileBuffer = fs.readFileSync(__dirname + labelFile);
-    var pixelValues = [];
+    var imagesData = [];
     
     for (var image = start; image < end; image++)
     { 
@@ -27,9 +27,9 @@ function readMNIST(start, end, imageFile, labelFile, squished = false)
         imageData["index"] = image;
         imageData["label"] = labelFileBuffer[image + 8];
         imageData["pixels"] = pixels;
-        pixelValues.push(imageData);
+        imagesData.push(imageData);
     }
-    return pixelValues;
+    return imagesData;
 }
 
 function saveMNIST(start, end, imageFile, labelFile)
@@ -37,9 +37,9 @@ function saveMNIST(start, end, imageFile, labelFile)
     const canvas = createCanvas(28, 28);
     const ctx = canvas.getContext('2d');
 
-    var pixelValues = readMNIST(start, end, imageFile, labelFile);
+    var imagesData = readMNIST(start, end, imageFile, labelFile);
 
-    pixelValues.forEach(function(image)
+    imagesData.forEach(function(image)
     { 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         for (var y = 0; y <= 27; y++)

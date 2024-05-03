@@ -33,8 +33,8 @@ function trainer(brain, numberOfBatches, batchSize = 1, start = 0) {
     for (let batchNumber = 0; batchNumber < numberOfBatches; batchNumber++)
     {
         let batchStart = start + (batchNumber * batchSize);
-        let pixelValues = readMNIST(batchStart, batchStart + batchSize, '\\train_images_60k.idx3-ubyte', '\\train_labels_60k.idx1-ubyte', true);
-        pixelValues.forEach(function(image)
+        let imagesData = readMNIST(batchStart, batchStart + batchSize, '\\train_images_60k.idx3-ubyte', '\\train_labels_60k.idx1-ubyte', true);
+        imagesData.forEach(function(image)
         {
             targetArray = new Array(10).fill(0);
             targetArray[image.label] = 1;
@@ -48,11 +48,11 @@ function trainer(brain, numberOfBatches, batchSize = 1, start = 0) {
 
 // testing function
 function tester(brain, amount, start = 0) {
-    var pixelValues = readMNIST(start, start + amount, '\\test_images_10k.idx3-ubyte', '\\test_labels_10k.idx1-ubyte', true);
+    var imagesData = readMNIST(start, start + amount, '\\test_images_10k.idx3-ubyte', '\\test_labels_10k.idx1-ubyte', true);
     const progressBar = new cliProgress.SingleBar({format: 'Testing Progress |' + '{bar}' + '| {percentage}% | {value}/{total} | ETA: {eta}s'}, cliProgress.Presets.shades_classic);
     progressBar.start(amount, 0);
     let accuracy = 0;
-    pixelValues.forEach(function(image)
+    imagesData.forEach(function(image)
     {
         targetArray = new Array(10).fill(0);
         targetArray[image.label] = 1;
