@@ -1,2 +1,3 @@
 node_modules/
 src/mnist_dataset/images
+src/custom_dataset/images
