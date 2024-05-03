@@ -6,7 +6,7 @@ const fs = require('fs');
 const cliProgress = require('cli-progress');
 
 
-let brain = new JellyBrain(784, 784, 10, costFuncs.crossEntropy, 0.001, activationFuncs.sigmoid, activationFuncs.softmax);
+let numberBrain = new JellyBrain(784, 784, 10, costFuncs.crossEntropy, 0.001, activationFuncs.sigmoid, activationFuncs.softmax);
 
 // save brain
 function saveBrain(brain, name)
@@ -69,21 +69,21 @@ function tester(brain, amount, start = 0) {
     return accuracy = (accuracy / amount) * 100;
 }
 
-let numberOfBatches = 5;
-let batchSize = 10;
-let startFrom = 0;
-let testAmount = 50;
+let numberOfBatches = 5000;
+let batchSize = 1;
+let startFrom = 22000;
+let testAmount = 100;
 
-//saveBrain(brain, "brain_before");
-//loadBrain(brain, "brain21000")
+//saveBrain(numberBrain, "brain_before");
+//loadBrain(numberBrain, "brain22000")
 
 
 let accuracyTable = Array();
 accuracyTable.push(["Training Samples", "Accuracy"]);
-accuracyTable.push([0, tester(brain, testAmount) + "%"]);
-trainer(brain, numberOfBatches, batchSize, startFrom);
-accuracyTable.push([numberOfBatches * batchSize, tester(brain, testAmount) + "%"]);
+accuracyTable.push([0, tester(numberBrain, testAmount) + "%"]);
+trainer(numberBrain, numberOfBatches, batchSize, startFrom);
+accuracyTable.push([numberOfBatches * batchSize, tester(numberBrain, testAmount) + "%"]);
 
-saveBrain(brain, "brainBatchTest");
+saveBrain(numberBrain, "brainBatchTest");
 
 console.table(accuracyTable);

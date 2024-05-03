@@ -229,12 +229,12 @@ class JellyBrain
         if (this.#batchSize >= 1)
         {       
             // Update biases
-            this.biasHO = math.subtract(this.biasHO, this.#biasHOChange);
-            this.biasIH = math.subtract(this.biasIH, this.#biasIHChange);
+            this.biasHO = math.add(this.biasHO, this.#biasHOChange);
+            this.biasIH = math.add(this.biasIH, this.#biasIHChange);
 
             // Update weights
-            this.weightsHO = math.subtract(this.weightsHO, this.#weightsHOChange);
-            this.weightsIH = math.subtract(this.weightsIH, this.#weightsIHChange);
+            this.weightsHO = math.add(this.weightsHO, this.#weightsHOChange);
+            this.weightsIH = math.add(this.weightsIH, this.#weightsIHChange);
             this.clearBatch();
         }
         else
