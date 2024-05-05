@@ -166,7 +166,7 @@ class JellyBrain
     #biasIHChange;
     #biasHOChange;
 
-    constructor(inputNodes, hiddenNodes, outputNodes, costFunction = errorSquared, learningRate = 0.3, activationFunction = sigmoid, activationFunctionOutput = sigmoid)
+    constructor(inputNodes, hiddenNodes, outputNodes, costFunction = errorSquared, learningRate = 0.005, activationFunction = sigmoid, activationFunctionOutput = sigmoid)
     {
         // set the parameteres for the neural network
         this.inputNodes = inputNodes;
@@ -324,6 +324,18 @@ class JellyBrain
         // Update weights
         this.#weightsHOChange = math.subtract(this.#weightsHOChange, math.multiply(math.squeeze(dcdwo), this.learningRate));
         this.#weightsIHChange = math.subtract(this.#weightsIHChange, math.multiply(math.squeeze(dcdwh), this.learningRate));
+    }
+
+    changeLearningRate(newLearningRate)
+    {
+        if (isNaN(newLearningRate))
+        {
+            console.warn("Cannot update learning rate because input was not a number")
+        }
+        else
+        {
+           this.learningRate = newLearningRate;
+        }
     }
 
     exportBrain()
