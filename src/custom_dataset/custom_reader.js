@@ -35,7 +35,7 @@ function saveCustom(start, end)
     })
 }
 
-saveCustom(0, 6);
+saveCustom(0, 49);
 
 exports.readCustom = readCustom
 exports.saveCustom = saveCustom

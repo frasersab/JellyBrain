@@ -6,7 +6,7 @@ const fs = require('fs');
 const cliProgress = require('cli-progress');
 
 
-let numberBrain = new JellyBrain(784, 784, 10, costFuncs.crossEntropy, 0.001, activationFuncs.sigmoid, activationFuncs.softmax);
+let numberBrain = new JellyBrain(784, 784, 10, costFuncs.crossEntropy, 0.0008, activationFuncs.sigmoid, activationFuncs.softmax);
 
 // save brain
 function saveBrain(brain, name)
@@ -69,18 +69,18 @@ function tester(brain, amount, start = 0) {
     return accuracy = (accuracy / amount) * 100;
 }
 
-let numberOfBatches = 5000;
+let numberOfBatches = 28000;
 let batchSize = 1;
-let startFrom = 22000;
-let testAmount = 100;
+let startFrom = 32000;
+let testAmount = 10000;
 
 //saveBrain(numberBrain, "brain_before");
-//loadBrain(numberBrain, "brain22000")
+loadBrain(numberBrain, "brain32000")
 
 
 let accuracyTable = Array();
 accuracyTable.push(["Training Samples", "Accuracy"]);
-accuracyTable.push([0, tester(numberBrain, testAmount) + "%"]);
+//accuracyTable.push([0, tester(numberBrain, testAmount) + "%"]);
 trainer(numberBrain, numberOfBatches, batchSize, startFrom);
 accuracyTable.push([numberOfBatches * batchSize, tester(numberBrain, testAmount) + "%"]);
 
