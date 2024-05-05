@@ -1,6 +1,11 @@
 # JellyBrain
 
-JellyBrain is a simple neural network written in Javascript. This was written as an exercise to learn how neural networks work.
+JellyBrain is a simple neural network written in Javascript. This was written as an exercise to learn how neural networks work. You can also test out the neural network with hand drawn numbers here: https://frasersab.github.io/JellyBrainInteractive/
+
+## Installation
+```
+npm install jellybrain
+```
 
 ## Simple Usage
 
