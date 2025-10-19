@@ -4,8 +4,8 @@ const {createCanvas} = require('canvas');
 
 function readMNIST(start, end, imageFile, labelFile, squished = false)
 {
-    var dataFileBuffer = fs.readFileSync(__dirname + imageFile);
-    var labelFileBuffer = fs.readFileSync(__dirname + labelFile);
+    var dataFileBuffer = fs.readFileSync(path.join(__dirname, imageFile));
+    var labelFileBuffer = fs.readFileSync(path.join(__dirname, labelFile));
     var imagesData = [];
     
     for (var image = start; image < end; image++)
@@ -40,6 +40,11 @@ function saveMNIST(start, end, imageFile, labelFile)
 
     var imagesData = readMNIST(start, end, imageFile, labelFile);
 
+    const imagesDir = path.join(__dirname, 'images');
+    if (!fs.existsSync(imagesDir)) {
+        fs.mkdirSync(imagesDir, { recursive: true });
+    }
+
     imagesData.forEach(function(image)
     { 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -54,16 +59,12 @@ function saveMNIST(start, end, imageFile, labelFile)
             }
         }
         const buffer = canvas.toBuffer('image/png')
-        const imagesDir = path.join(__dirname, 'images');
-        if (!fs.existsSync(imagesDir)) {
-            fs.mkdirSync(imagesDir, { recursive: true });
-        }
         const imagePath = path.join(imagesDir, `image${image.index}-${image.label}.png`);
         fs.writeFileSync(imagePath, buffer)
     })
 }
 
-saveMNIST(0, 5, '\\test_images_10k.idx3-ubyte', '\\test_labels_10k.idx1-ubyte');
+saveMNIST(0, 5, 'test_images_10k.idx3-ubyte', 'test_labels_10k.idx1-ubyte');
 
 exports.readMNIST = readMNIST
 exports.saveMNIST = saveMNIST

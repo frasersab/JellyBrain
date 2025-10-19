@@ -16,6 +16,11 @@ function saveCustom(start, end)
 
     imagesDataSlice = readCustom(start, end);
 
+    const imagesDir = path.join(__dirname, 'images');
+    if (!fs.existsSync(imagesDir)) {
+        fs.mkdirSync(imagesDir, { recursive: true });
+    }
+
     imagesDataSlice.forEach(function(image)
     {
         pixels = image.pixels
@@ -32,10 +37,6 @@ function saveCustom(start, end)
             }
         }
         const buffer = canvas.toBuffer('image/png')
-        const imagesDir = path.join(__dirname, 'images');
-        if (!fs.existsSync(imagesDir)) {
-            fs.mkdirSync(imagesDir, { recursive: true });
-        }
         const imagePath = path.join(imagesDir, `image${image.index}-${label}.png`);
         fs.writeFileSync(imagePath, buffer)
     })
