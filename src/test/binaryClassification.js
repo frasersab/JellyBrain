@@ -18,10 +18,10 @@ function trainer(brain, amount) {
         inputs[i] = [Math.random(), Math.random()];
         // if input is below line then 0, if above then 1
         if (y(inputs[i][0]) > inputs[i][1]) {
-            targets[i] = 0;
+            targets[i] = [0];
         }
         else {
-            targets[i] = 1;
+            targets[i] = [0];
         }
         brain.train(inputs[i], targets[i]);
     }
@@ -38,15 +38,15 @@ function tester(brain, amount) {
         inputs[i] = [Math.random(), Math.random()];
         // if input is below line then 0, if above then 1
         if (y(inputs[i][0]) > inputs[i][1]) {
-            targets[i] = 0;
+            targets[i] = [0];
         }
         else {
-            targets[i] = 1;
+            targets[i] = [1];
         }
 
-        guess[i] = Math.round(brain.guess(inputs[i]));
+        guess[i] = Math.round(brain.guess(inputs[i])[0]);
 
-        if (guess[i] == targets[i]) {
+        if (guess[i] == targets[i][0]) {
             accuracy++;
         }
     }

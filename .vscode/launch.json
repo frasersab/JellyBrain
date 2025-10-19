@@ -11,7 +11,7 @@
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}\\src\\simpleLinearRegression.js"
+            "program": "${workspaceFolder}\\src\\test\\simpleLinearRegression.js"
         },
         {
             "type": "node",
@@ -20,7 +20,7 @@
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}\\src\\binaryClassification.js"
+            "program": "${workspaceFolder}\\src\\test\\binaryClassification.js"
         },
         {
             "type": "node",

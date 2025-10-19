@@ -53,7 +53,7 @@ function saveMNIST(start, end, imageFile, labelFile)
             }
         }
         const buffer = canvas.toBuffer('image/png')
-        fs.writeFileSync(__dirname + `\\images\\image${image.index}-${image.label}.png`, buffer)
+        fs.writeFileSync(__dirname + `\\images\\image${image.index}-${image.label}.png`, buffer)    //TODO: get it to create /images folder if not there
     })
 }
 
