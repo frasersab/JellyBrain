@@ -203,6 +203,29 @@ class JellyBrain
         this.#biasHOChange = math.zeros(this.biasHO.length).toArray();
     }
 
+    #readOnlyProxy(obj)
+    {
+        if (obj === null || obj === undefined) return obj;
+        
+        return new Proxy(obj, {
+            set(target, property, value) {
+                console.error(`Attempt to modify read-only property '${property}'`);
+                return false;
+            },
+            deleteProperty(target, property) {
+                console.error(`Attempt to delete read-only property '${property}'`);
+                return false;
+            },
+            get(target, property) {
+                const value = target[property];
+                if (value !== null && typeof value === 'object') {
+                    return new Proxy(value, this);
+                }
+                return value;
+            }
+        });
+    }
+
     guess(input)
     {
         // generate hidden layer Z and A
@@ -309,7 +332,7 @@ class JellyBrain
         let dcdah = math.multiply(dcdzo, math.transpose(this.weightsHO));
 
         // da/dz(hidden)
-        let dadzh = [this.activation.dfunc(this.#hiddenZ)];
+        let dadzh = [this.activation.dfunc(this.#hiddenZ)];        //TODO: potential error here with?
 
         // dc/dz(hidden) = dc/dah ○ da/dzh (element wise)
         let dcdzh = math.dotMultiply(dcdah, dadzh);
@@ -354,6 +377,71 @@ class JellyBrain
         this.weightsHO = brainImport.weightsHO;
         this.biasIH = brainImport.biasH;
         this.biasHO = brainImport.biasO;
+    }
+
+    getHiddenZ()
+    {
+        return this.#readOnlyProxy(this.#hiddenZ);
+    }
+
+    getHiddenA()
+    {
+        return this.#readOnlyProxy(this.#hiddenA);
+    }
+
+    getOutputZ()
+    {
+        return this.#readOnlyProxy(this.#outputZ);
+    }
+
+    getOutputA()
+    {
+        return this.#readOnlyProxy(this.#outputA);
+    }
+
+    getWeightsIH()
+    {
+        return this.#readOnlyProxy(this.weightsIH);
+    }
+
+    getWeightsHO()
+    {
+        return this.#readOnlyProxy(this.weightsHO);
+    }
+
+    getBiasIH()
+    {
+        return this.#readOnlyProxy(this.biasIH);
+    }
+
+    getBiasHO()
+    {
+        return this.#readOnlyProxy(this.biasHO);
+    }
+
+    getBatchSize()
+    {
+        return this.#batchSize;
+    }
+
+    getWeightsIHChange()
+    {
+        return this.#readOnlyProxy(this.#weightsIHChange);
+    }
+
+    getWeightsHOChange()
+    {
+        return this.#readOnlyProxy(this.#weightsHOChange);
+    }
+
+    getBiasIHChange()
+    {
+        return this.#readOnlyProxy(this.#biasIHChange);
+    }
+
+    getBiasHOChange()
+    {
+        return this.#readOnlyProxy(this.#biasHOChange);
     }
 }
 
