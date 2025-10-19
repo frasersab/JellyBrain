@@ -1,4 +1,5 @@
 var fs = require('fs');
+var path = require('path');
 const imagesData = require('./custom_images.json');
 const {createCanvas} = require('canvas');
 
@@ -31,7 +32,12 @@ function saveCustom(start, end)
             }
         }
         const buffer = canvas.toBuffer('image/png')
-        fs.writeFileSync(__dirname + `\\images\\image${image.index}-${label}.png`, buffer)
+        const imagesDir = path.join(__dirname, 'images');
+        if (!fs.existsSync(imagesDir)) {
+            fs.mkdirSync(imagesDir, { recursive: true });
+        }
+        const imagePath = path.join(imagesDir, `image${image.index}-${label}.png`);
+        fs.writeFileSync(imagePath, buffer)
     })
 }
 

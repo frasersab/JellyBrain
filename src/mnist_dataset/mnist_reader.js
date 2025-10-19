@@ -1,4 +1,5 @@
 var fs = require('fs');
+var path = require('path');
 const {createCanvas} = require('canvas');
 
 function readMNIST(start, end, imageFile, labelFile, squished = false)
@@ -53,7 +54,12 @@ function saveMNIST(start, end, imageFile, labelFile)
             }
         }
         const buffer = canvas.toBuffer('image/png')
-        fs.writeFileSync(__dirname + `\\images\\image${image.index}-${image.label}.png`, buffer)    //TODO: get it to create /images folder if not there
+        const imagesDir = path.join(__dirname, 'images');
+        if (!fs.existsSync(imagesDir)) {
+            fs.mkdirSync(imagesDir, { recursive: true });
+        }
+        const imagePath = path.join(imagesDir, `image${image.index}-${image.label}.png`);
+        fs.writeFileSync(imagePath, buffer)
     })
 }
 
