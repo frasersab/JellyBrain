@@ -21,7 +21,7 @@ function trainer(brain, amount) {
             targets[i] = [0];
         }
         else {
-            targets[i] = [0];
+            targets[i] = [1];
         }
         brain.train(inputs[i], targets[i]);
     }

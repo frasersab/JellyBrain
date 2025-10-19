@@ -226,8 +226,31 @@ class JellyBrain
         });
     }
 
+    #inputValidation(input)
+    {
+        if (!Array.isArray(input) || input.length !== this.inputNodes) {
+            console.error(`Input must be an array of length ${this.inputNodes}`);
+            return true;
+        }
+        return false;
+    }
+
+    #targetValidation(target)
+    {
+        if (!Array.isArray(target) || target.length !== this.outputNodes) {
+            console.error(`Target must be an array of length ${this.outputNodes}`);
+            return true;
+        }
+        return false;
+    }
+
     guess(input)
     {
+        // validate input
+        if (this.#inputValidation(input)) {
+            return null;
+        }
+
         // generate hidden layer Z and A
         this.#hiddenZ = math.add(math.multiply(input, this.weightsIH), this.biasIH);
         this.#hiddenA = this.activation.func(this.#hiddenZ);
@@ -242,6 +265,11 @@ class JellyBrain
 
     addToBatch(input, target)
     {
+        // validate input and target
+        if (this.#inputValidation(input) || this.#targetValidation(target)) {
+            return;
+        }
+
         this.guess(input);
         this.#backprop(input, target);
         this.#batchSize++;
