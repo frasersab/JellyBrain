@@ -345,18 +345,18 @@ class JellyBrain
         let dadzh = [this.#activation.dfunc(this.#hiddenZ)];
 
         // dc/dz(hidden) = dc/dah ○ da/dzh (element wise)
-        let dcdzh = math.dotMultiply(dcdah, dadzh);
+        let dcdzh = math.dotMultiply(dcdah, dadzh);         // meant to be an array?
 
         // dc/dw(hidden) = dzh/dwh(T) ⋅ dc/dzh (dot product)
         let dcdwh = math.multiply(math.transpose([input]), dcdzh);
 
         // Update biases
-        this.#biasHOChange = math.subtract(this.#biasHOChange, math.multiply(math.squeeze(dcdzo), this.#learningRate));
-        this.#biasIHChange = math.subtract(this.#biasIHChange, math.multiply(math.squeeze(dcdzh), this.#learningRate));
+        this.#biasHOChange = math.subtract(this.#biasHOChange, math.multiply(dcdzo, this.#learningRate));
+        this.#biasIHChange = math.subtract(this.#biasIHChange, math.multiply(dcdzh[0], this.#learningRate));
 
         // Update weights
-        this.#weightsHOChange = math.subtract(this.#weightsHOChange, math.multiply(math.squeeze(dcdwo), this.#learningRate));
-        this.#weightsIHChange = math.subtract(this.#weightsIHChange, math.multiply(math.squeeze(dcdwh), this.#learningRate));
+        this.#weightsHOChange = math.subtract(this.#weightsHOChange, math.multiply(dcdwo, this.#learningRate));
+        this.#weightsIHChange = math.subtract(this.#weightsIHChange, math.multiply(dcdwh, this.#learningRate));
     }
 
     setLearningRate(newLearningRate)
