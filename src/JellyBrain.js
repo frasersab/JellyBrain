@@ -156,6 +156,17 @@ const activationFuncs = Object.freeze(
 
 class JellyBrain
 {
+    #inputNodes;
+    #hiddenNodes;
+    #outputNodes;
+    #costFunction;
+    #learningRate;
+    #activation;
+    #activationOutput;
+    #weightsIH;
+    #weightsHO;
+    #biasIH;
+    #biasHO;
     #hiddenZ;
     #hiddenA;
     #outputZ;
@@ -169,25 +180,25 @@ class JellyBrain
     constructor(inputNodes, hiddenNodes, outputNodes, costFunction = errorSquared, learningRate = 0.005, activationFunction = sigmoid, activationFunctionOutput = sigmoid)
     {
         // set the parameteres for the neural network
-        this.inputNodes = inputNodes;
-        this.hiddenNodes = hiddenNodes;
-        this.outputNodes = outputNodes;
-        this.costFunction = costFunction;
-        this.learningRate = learningRate;
-        this.activation = activationFunction;
-        this.activationOutput = activationFunctionOutput;
+        this.#inputNodes = inputNodes;
+        this.#hiddenNodes = hiddenNodes;
+        this.#outputNodes = outputNodes;
+        this.#costFunction = costFunction;
+        this.#learningRate = learningRate;
+        this.#activation = activationFunction;
+        this.#activationOutput = activationFunctionOutput;
 
         // find the optimal range to initialise the weights to prevent saturation
-        let initIHRange = 1 / math.sqrt(this.hiddenNodes);
-        let initHORange = 1 / math.sqrt(this.outputNodes);
+        let initIHRange = 1 / math.sqrt(this.#hiddenNodes);
+        let initHORange = 1 / math.sqrt(this.#outputNodes);
 
         // create the weights matrix with random weights within the specified range
-        this.weightsIH = math.random([this.inputNodes, this.hiddenNodes], -initIHRange, initIHRange);
-        this.weightsHO = math.random([this.hiddenNodes, this.outputNodes], -initHORange, initHORange);
+        this.#weightsIH = math.random([this.#inputNodes, this.#hiddenNodes], -initIHRange, initIHRange);
+        this.#weightsHO = math.random([this.#hiddenNodes, this.#outputNodes], -initHORange, initHORange);
 
         // create bias arrays with initialisation to 0
-        this.biasIH = math.zeros(this.hiddenNodes).toArray();
-        this.biasHO = math.zeros(this.outputNodes).toArray();
+        this.#biasIH = math.zeros(this.#hiddenNodes).toArray();
+        this.#biasHO = math.zeros(this.#outputNodes).toArray();
 
         // feedforward variables
         this.#hiddenZ;
@@ -197,10 +208,10 @@ class JellyBrain
 
         // backpropigation variables
         this.#batchSize = 0;
-        this.#weightsIHChange = math.zeros(math.size(this.weightsIH));
-        this.#weightsHOChange = math.zeros(math.size(this.weightsHO));
-        this.#biasIHChange = math.zeros(this.biasIH.length).toArray();
-        this.#biasHOChange = math.zeros(this.biasHO.length).toArray();
+        this.#weightsIHChange = math.zeros(math.size(this.#weightsIH));
+        this.#weightsHOChange = math.zeros(math.size(this.#weightsHO));
+        this.#biasIHChange = math.zeros(this.#biasIH.length).toArray();
+        this.#biasHOChange = math.zeros(this.#biasHO.length).toArray();
     }
 
     #readOnlyProxy(obj)
@@ -228,8 +239,8 @@ class JellyBrain
 
     #inputValidation(input)
     {
-        if (!Array.isArray(input) || input.length !== this.inputNodes) {
-            console.error(`Input must be an array of length ${this.inputNodes}`);
+        if (!Array.isArray(input) || input.length !== this.#inputNodes) {
+            console.error(`Input must be an array of length ${this.#inputNodes}`);
             return true;
         }
         return false;
@@ -237,8 +248,8 @@ class JellyBrain
 
     #targetValidation(target)
     {
-        if (!Array.isArray(target) || target.length !== this.outputNodes) {
-            console.error(`Target must be an array of length ${this.outputNodes}`);
+        if (!Array.isArray(target) || target.length !== this.#outputNodes) {
+            console.error(`Target must be an array of length ${this.#outputNodes}`);
             return true;
         }
         return false;
@@ -252,12 +263,12 @@ class JellyBrain
         }
 
         // generate hidden layer Z and A
-        this.#hiddenZ = math.add(math.multiply(input, this.weightsIH), this.biasIH);
-        this.#hiddenA = this.activation.func(this.#hiddenZ);
+        this.#hiddenZ = math.add(math.multiply(input, this.#weightsIH), this.#biasIH);
+        this.#hiddenA = this.#activation.func(this.#hiddenZ);
 
         // generate outputs Z and A
-        this.#outputZ = math.add(math.multiply(this.#hiddenA, this.weightsHO), this.biasHO);
-        this.#outputA = this.activationOutput.func(this.#outputZ);
+        this.#outputZ = math.add(math.multiply(this.#hiddenA, this.#weightsHO), this.#biasHO);
+        this.#outputA = this.#activationOutput.func(this.#outputZ);
 
         // send back array of outputs
         return this.#outputA;
@@ -280,12 +291,12 @@ class JellyBrain
         if (this.#batchSize >= 1)
         {       
             // Update biases
-            this.biasHO = math.add(this.biasHO, this.#biasHOChange);
-            this.biasIH = math.add(this.biasIH, this.#biasIHChange);
+            this.#biasHO = math.add(this.#biasHO, this.#biasHOChange);
+            this.#biasIH = math.add(this.#biasIH, this.#biasIHChange);
 
             // Update weights
-            this.weightsHO = math.add(this.weightsHO, this.#weightsHOChange);
-            this.weightsIH = math.add(this.weightsIH, this.#weightsIHChange);
+            this.#weightsHO = math.add(this.#weightsHO, this.#weightsHOChange);
+            this.#weightsIH = math.add(this.#weightsIH, this.#weightsIHChange);
             this.clearBatch();
         }
         else
@@ -297,10 +308,10 @@ class JellyBrain
     clearBatch()
     {
         this.#batchSize = 0;
-        this.#weightsIHChange = math.zeros(math.size(this.weightsIH));
-        this.#weightsHOChange = math.zeros(math.size(this.weightsHO));
-        this.#biasIHChange = math.zeros(this.biasIH.length).toArray();
-        this.#biasHOChange = math.zeros(this.biasHO.length).toArray();
+        this.#weightsIHChange = math.zeros(math.size(this.#weightsIH));
+        this.#weightsHOChange = math.zeros(math.size(this.#weightsHO));
+        this.#biasIHChange = math.zeros(this.#biasIH.length).toArray();
+        this.#biasHOChange = math.zeros(this.#biasHO.length).toArray();
     }
 
     train(input, target)
@@ -325,7 +336,7 @@ class JellyBrain
 
         // -Output layer-
         // when softmax and cross entropy are used together the dc/dz(outputs) calculation can be greatly simplified
-        if (this.activationOutput.name == activationFuncNames.softmax && this.costFunction.name == costFuncNames.crossEntropy)
+        if (this.#activationOutput.name == activationFuncNames.softmax && this.#costFunction.name == costFuncNames.crossEntropy)
         {
             // dc/dz(outputs) = #outputA - target
             dcdzo = math.subtract(this.#outputA, target);
@@ -333,14 +344,14 @@ class JellyBrain
         else
         {
             // dc/da(outputs)
-            dcdao = this.costFunction.dfunc(target, this.#outputA);
+            dcdao = this.#costFunction.dfunc(target, this.#outputA);
 
             // TODO: give activationOutput.dfunc ability to cheat and use #outputA as the dfunc uses the func for sigmoid and softmax
             // da/dz(outputs)
-            dadzo = this.activationOutput.dfunc(this.#outputZ);
+            dadzo = this.#activationOutput.dfunc(this.#outputZ);
 
             // dc/dz(outputs) is calculated differently depending on if the activationOutput is a scalar or vector function
-            if(this.activationOutput.functionType == functionTypes.scalar)
+            if(this.#activationOutput.functionType == functionTypes.scalar)
             {
                 // dc/dz(outputs) = dc/dao ○ da/dzo (element wise)
                 dcdzo = math.dotMultiply(dcdao, dadzo);
@@ -360,10 +371,10 @@ class JellyBrain
 
         // -Hidden layer- 
         // dc/da(hidden) = dc/dz(outputs) ⋅ dz/da(hidden)(T)
-        let dcdah = math.multiply([dcdzo], math.transpose(this.weightsHO));
+        let dcdah = math.multiply([dcdzo], math.transpose(this.#weightsHO));
 
         // da/dz(hidden)
-        let dadzh = [this.activation.dfunc(this.#hiddenZ)];
+        let dadzh = [this.#activation.dfunc(this.#hiddenZ)];
 
         // dc/dz(hidden) = dc/dah ○ da/dzh (element wise)
         let dcdzh = math.dotMultiply(dcdah, dadzh);
@@ -372,12 +383,12 @@ class JellyBrain
         let dcdwh = math.multiply(math.transpose([input]), dcdzh);
 
         // Update biases
-        this.#biasHOChange = math.subtract(this.#biasHOChange, math.multiply(math.squeeze(dcdzo), this.learningRate));
-        this.#biasIHChange = math.subtract(this.#biasIHChange, math.multiply(math.squeeze(dcdzh), this.learningRate));
+        this.#biasHOChange = math.subtract(this.#biasHOChange, math.multiply(math.squeeze(dcdzo), this.#learningRate));
+        this.#biasIHChange = math.subtract(this.#biasIHChange, math.multiply(math.squeeze(dcdzh), this.#learningRate));
 
         // Update weights
-        this.#weightsHOChange = math.subtract(this.#weightsHOChange, math.multiply(math.squeeze(dcdwo), this.learningRate));
-        this.#weightsIHChange = math.subtract(this.#weightsIHChange, math.multiply(math.squeeze(dcdwh), this.learningRate));
+        this.#weightsHOChange = math.subtract(this.#weightsHOChange, math.multiply(math.squeeze(dcdwo), this.#learningRate));
+        this.#weightsIHChange = math.subtract(this.#weightsIHChange, math.multiply(math.squeeze(dcdwh), this.#learningRate));
     }
 
     changeLearningRate(newLearningRate)
@@ -388,26 +399,36 @@ class JellyBrain
         }
         else
         {
-           this.learningRate = newLearningRate;
+           this.#learningRate = newLearningRate;
         }
     }
 
     exportBrain()
     {
         var brainExport = {};
-        brainExport["weightsIH"] = this.weightsIH;
-        brainExport["weightsHO"] = this.weightsHO;
-        brainExport["biasH"] = this.biasIH;
-        brainExport["biasO"] = this.biasHO;
-        return this.#readOnlyProxy(brainExport);
+        brainExport["weightsIH"] = this.#weightsIH;
+        brainExport["weightsHO"] = this.#weightsHO;
+        brainExport["biasH"] = this.#biasIH;
+        brainExport["biasO"] = this.#biasHO;
+        return brainExport;
     }
 
     importBrain(brainImport)
     {
-        this.weightsIH = brainImport.weightsIH;
-        this.weightsHO = brainImport.weightsHO;
-        this.biasIH = brainImport.biasH;
-        this.biasHO = brainImport.biasO;
+        // validate the import structure
+        if (!brainImport || typeof brainImport !== 'object') {
+            console.error('Invalid brain import data. Import cancelled.');
+            return
+        }
+        // validate dimensions match
+        if (!Array.isArray(brainImport.weightsIH) || brainImport.weightsIH.length !== this.#inputNodes || brainImport.weightsIH[0].length !== this.#hiddenNodes) {
+            console.error('Weight dimensions do not match network architecture');
+            return
+        }
+        this.#weightsIH = brainImport.weightsIH;
+        this.#weightsHO = brainImport.weightsHO;
+        this.#biasIH = brainImport.biasH;
+        this.#biasHO = brainImport.biasO;
     }
 
     getHiddenZ()
@@ -432,22 +453,22 @@ class JellyBrain
 
     getWeightsIH()
     {
-        return this.#readOnlyProxy(this.weightsIH);
+        return this.#readOnlyProxy(this.#weightsIH);
     }
 
     getWeightsHO()
     {
-        return this.#readOnlyProxy(this.weightsHO);
+        return this.#readOnlyProxy(this.#weightsHO);
     }
 
     getBiasIH()
     {
-        return this.#readOnlyProxy(this.biasIH);
+        return this.#readOnlyProxy(this.#biasIH);
     }
 
     getBiasHO()
     {
-        return this.#readOnlyProxy(this.biasHO);
+        return this.#readOnlyProxy(this.#biasHO);
     }
 
     getBatchSize()
