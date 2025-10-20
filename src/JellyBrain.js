@@ -328,39 +328,42 @@ class JellyBrain
         if (this.activationOutput.name == activationFuncNames.softmax && this.costFunction.name == costFuncNames.crossEntropy)
         {
             // dc/dz(outputs) = #outputA - target
-            dcdzo = [math.subtract(this.#outputA, target)];
+            dcdzo = math.subtract(this.#outputA, target);
         }
         else
         {
             // dc/da(outputs)
             dcdao = this.costFunction.dfunc(target, this.#outputA);
 
-            // TODO: give activationOutput.dfunc abiity to cheat and use #outputA as the dfunc uses the func for sigmoid and softmax
+            // TODO: give activationOutput.dfunc ability to cheat and use #outputA as the dfunc uses the func for sigmoid and softmax
             // da/dz(outputs)
             dadzo = this.activationOutput.dfunc(this.#outputZ);
 
             // dc/dz(outputs) is calculated differently depending on if the activationOutput is a scalar or vector function
             if(this.activationOutput.functionType == functionTypes.scalar)
             {
-                // dc/dz(outputs) = dc/dao ○ da/dzo (elemnt wise)
+                // dc/dz(outputs) = dc/dao ○ da/dzo (element wise)
                 dcdzo = math.dotMultiply(dcdao, dadzo);
             }
             else
             {
                 // dc/dz(outputs) = dc/dao(T) ⋅ da/dzo (dot product)
-                dcdzo = math.multiply([math.transpose(dcdao)], dadzo);
+                let test = [dcdao];
+                let test2 = math.transpose([dcdao])
+                let test3  = [math.transpose(dcdao)]
+                dcdzo = math.squeeze(math.multiply([dcdao], dadzo));
             }
         }
 
         // dc/dw(outputs) = dzo/dwo(T) ⋅ dc/dzo (dot product)
-        let dcdwo = math.multiply(math.transpose([this.#hiddenA]), dcdzo);
+        let dcdwo = math.multiply(math.transpose([this.#hiddenA]), [dcdzo]);
 
         // -Hidden layer- 
         // dc/da(hidden) = dc/dz(outputs) ⋅ dz/da(hidden)(T)
-        let dcdah = math.multiply(dcdzo, math.transpose(this.weightsHO));
+        let dcdah = math.multiply([dcdzo], math.transpose(this.weightsHO));
 
         // da/dz(hidden)
-        let dadzh = [this.activation.dfunc(this.#hiddenZ)];        //TODO: potential error here with?
+        let dadzh = [this.activation.dfunc(this.#hiddenZ)];
 
         // dc/dz(hidden) = dc/dah ○ da/dzh (element wise)
         let dcdzh = math.dotMultiply(dcdah, dadzh);
@@ -396,7 +399,7 @@ class JellyBrain
         brainExport["weightsHO"] = this.weightsHO;
         brainExport["biasH"] = this.biasIH;
         brainExport["biasO"] = this.biasHO;
-        return brainExport;
+        return this.#readOnlyProxy(brainExport);
     }
 
     importBrain(brainImport)
