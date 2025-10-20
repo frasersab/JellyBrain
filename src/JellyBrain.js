@@ -208,29 +208,6 @@ class JellyBrain
         this.#biasHOChange = math.zeros(this.#biasHO.length).toArray();
     }
 
-    #readOnlyProxy(obj)
-    {
-        if (obj === null || obj === undefined) return obj;
-        
-        return new Proxy(obj, {
-            set(target, property, value) {
-                console.error(`Attempt to modify read-only property '${property}'`);
-                return false;
-            },
-            deleteProperty(target, property) {
-                console.error(`Attempt to delete read-only property '${property}'`);
-                return false;
-            },
-            get(target, property) {
-                const value = target[property];
-                if (value !== null && typeof value === 'object') {
-                    return new Proxy(value, this);
-                }
-                return value;
-            }
-        });
-    }
-
     #inputValidation(input)
     {
         if (!Array.isArray(input) || input.length !== this.#inputNodes) {
@@ -353,9 +330,6 @@ class JellyBrain
             else
             {
                 // dc/dz(outputs) = dc/dao(T) ⋅ da/dzo (dot product)
-                let test = [dcdao];
-                let test2 = math.transpose([dcdao])
-                let test3  = [math.transpose(dcdao)]
                 dcdzo = math.squeeze(math.multiply([dcdao], dadzo));
             }
         }
@@ -463,42 +437,42 @@ class JellyBrain
 
     getHiddenZ()
     {
-        return this.#readOnlyProxy(this.#hiddenZ);
+        return structuredClone(this.#hiddenZ);
     }
 
     getHiddenA()
     {
-        return this.#readOnlyProxy(this.#hiddenA);
+        return structuredClone(this.#hiddenA);
     }
 
     getOutputZ()
     {
-        return this.#readOnlyProxy(this.#outputZ);
+        return structuredClone(this.#outputZ);
     }
 
     getOutputA()
     {
-        return this.#readOnlyProxy(this.#outputA);
+        return structuredClone(this.#outputA);
     }
 
     getWeightsIH()
     {
-        return this.#readOnlyProxy(this.#weightsIH);
+        return structuredClone(this.#weightsIH);
     }
 
     getWeightsHO()
     {
-        return this.#readOnlyProxy(this.#weightsHO);
+        return structuredClone(this.#weightsHO);
     }
 
     getBiasIH()
     {
-        return this.#readOnlyProxy(this.#biasIH);
+        return structuredClone(this.#biasIH);
     }
 
     getBiasHO()
     {
-        return this.#readOnlyProxy(this.#biasHO);
+        return structuredClone(this.#biasHO);
     }
 
     getBatchSize()
@@ -508,22 +482,22 @@ class JellyBrain
 
     getWeightsIHChange()
     {
-        return this.#readOnlyProxy(this.#weightsIHChange);
+        return structuredClone(this.#weightsIHChange);
     }
 
     getWeightsHOChange()
     {
-        return this.#readOnlyProxy(this.#weightsHOChange);
+        return structuredClone(this.#weightsHOChange);
     }
 
     getBiasIHChange()
     {
-        return this.#readOnlyProxy(this.#biasIHChange);
+        return structuredClone(this.#biasIHChange);
     }
 
     getBiasHOChange()
     {
-        return this.#readOnlyProxy(this.#biasHOChange);
+        return structuredClone(this.#biasHOChange);
     }
 }
 
