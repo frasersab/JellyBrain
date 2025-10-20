@@ -200,12 +200,6 @@ class JellyBrain
         this.#biasIH = math.zeros(this.#hiddenNodes).toArray();
         this.#biasHO = math.zeros(this.#outputNodes).toArray();
 
-        // feedforward variables
-        this.#hiddenZ;
-        this.#hiddenA;
-        this.#outputZ;
-        this.#outputA;
-
         // backpropigation variables
         this.#batchSize = 0;
         this.#weightsIHChange = math.zeros(math.size(this.#weightsIH));
@@ -391,7 +385,7 @@ class JellyBrain
         this.#weightsIHChange = math.subtract(this.#weightsIHChange, math.multiply(math.squeeze(dcdwh), this.#learningRate));
     }
 
-    changeLearningRate(newLearningRate)
+    setLearningRate(newLearningRate)
     {
         if (isNaN(newLearningRate))
         {
@@ -410,7 +404,7 @@ class JellyBrain
         brainExport["weightsHO"] = this.#weightsHO;
         brainExport["biasH"] = this.#biasIH;
         brainExport["biasO"] = this.#biasHO;
-        return brainExport;
+        return structuredClone(brainExport);
     }
 
     importBrain(brainImport)
@@ -421,14 +415,50 @@ class JellyBrain
             return
         }
         // validate dimensions match
-        if (!Array.isArray(brainImport.weightsIH) || brainImport.weightsIH.length !== this.#inputNodes || brainImport.weightsIH[0].length !== this.#hiddenNodes) {
-            console.error('Weight dimensions do not match network architecture');
-            return
+        if (!Array.isArray(brainImport.weightsIH) || brainImport.weightsIH.length !== this.#inputNodes || !Array.isArray(brainImport.weightsIH[0]) ||brainImport.weightsIH[0].length !== this.#hiddenNodes) 
+        {
+            console.error('WeightsIH dimensions do not match network architecture. Import cancelled.');
+            return;
+        }    
+        if (!Array.isArray(brainImport.weightsHO) || brainImport.weightsHO.length !== this.#hiddenNodes || !Array.isArray(brainImport.weightsHO[0]) ||brainImport.weightsHO[0].length !== this.#outputNodes) 
+        {
+            console.error('WeightsHO dimensions do not match network architecture. Import cancelled.');
+            return;
         }
-        this.#weightsIH = brainImport.weightsIH;
-        this.#weightsHO = brainImport.weightsHO;
-        this.#biasIH = brainImport.biasH;
-        this.#biasHO = brainImport.biasO;
+        if (!Array.isArray(brainImport.biasH) || brainImport.biasH.length !== this.#hiddenNodes) 
+        {
+            console.error('BiasH dimensions do not match network architecture. Import cancelled.');
+            return;
+        }
+        if (!Array.isArray(brainImport.biasO) || brainImport.biasO.length !== this.#outputNodes) 
+        {
+            console.error('BiasO dimensions do not match network architecture. Import cancelled.');
+            return;
+        }
+        this.#weightsIH = structuredClone(brainImport.weightsIH);
+        this.#weightsHO = structuredClone(brainImport.weightsHO);
+        this.#biasIH = structuredClone(brainImport.biasH);
+        this.#biasHO = structuredClone(brainImport.biasO);
+    }
+
+    getInputNodes()
+    {
+        return this.#inputNodes;
+    }
+
+    getHiddenNodes()
+    {
+        return this.#hiddenNodes;
+    }
+
+    getOutputNodes()
+    {
+        return this.#outputNodes;
+    }
+
+    getLearningRate()
+    {
+        return this.#learningRate;
     }
 
     getHiddenZ()
