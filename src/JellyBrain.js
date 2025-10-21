@@ -3,7 +3,7 @@
 
 const math = require('mathjs')
 
-// enumerations
+// numerations
 const costFuncNames = Object.freeze(
 {
     errorSquared: Symbol(0),
@@ -317,7 +317,7 @@ class JellyBrain
 
     #backprop(input, target)
     {
-        // Dimension Notation:
+        // Dimension notation:
         // I - array length of inputs
         // H - array lrngth of hidden nodes
         // T - array length of targets/outputs
