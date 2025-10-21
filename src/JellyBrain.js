@@ -233,15 +233,31 @@ class JellyBrain
             return null;
         }
 
-        // generate hidden layer Z and A
+        // Dimension notation:
+        // I - array length of inputs
+        // H - array lrngth of hidden nodes
+        // T - array length of targets/outputs
+
+        // Forward propagation - Hidden Layer
+        // hiddenZ = input × weightsIH + biasIH
+        // [H] = [1×I] × [I×H] + [H]
         this.#hiddenZ = math.add(math.multiply(input, this.#weightsIH), this.#biasIH);
+        
+        // hiddenA = activation(hiddenZ)
+        // [H] = activation([H])
         this.#hiddenA = this.#activation.func(this.#hiddenZ);
 
-        // generate outputs Z and A
+
+        // Forward propagation - Output Layer
+        // outputZ = hiddenA × weightsHO + biasHO
+        // [T] = [1×H] × [H×O] + [T]
         this.#outputZ = math.add(math.multiply(this.#hiddenA, this.#weightsHO), this.#biasHO);
+        
+        // outputA = activation(outputZ)
+        // [T] = activation([T])
         this.#outputA = this.#activationOutput.func(this.#outputZ);
 
-        // send back array of outputs
+        // return output activations
         return this.#outputA;
     }
 
@@ -301,6 +317,11 @@ class JellyBrain
 
     #backprop(input, target)
     {
+        // Dimension Notation:
+        // I - array length of inputs
+        // H - array lrngth of hidden nodes
+        // T - array length of targets/outputs
+
         let dcdzo;
         let dcdao;
         let dadzo;
@@ -309,61 +330,84 @@ class JellyBrain
         // when softmax and cross entropy are used together the dc/dz(outputs) calculation can be greatly simplified
         if (this.#activationOutput.name == activationFuncNames.softmax && this.#costFunction.name == costFuncNames.crossEntropy)
         {
-            // dc/dz(outputs) = #outputA - target
+            // dc/dz(outputs) = outputA - target
+            // [T] = [T] - [T]
             dcdzo = math.subtract(this.#outputA, target);
         }
         else
         {
             // dc/da(outputs)
+            // [T]
             dcdao = this.#costFunction.dfunc(target, this.#outputA);
 
-            // TODO: give activationOutput.dfunc ability to cheat and use #outputA as the dfunc uses the func for sigmoid and softmax
-            // da/dz(outputs)
+            // TODO: give activationOutput.dfunc ability to cheat and use outputA as the dfunc uses the func for sigmoid and softmax
+            // da/dz(outputs) depends on activation type:
+            // - scalar activation: [T]
+            // - vector activation (softmax): [T×T] - Jacobian matrix
             dadzo = this.#activationOutput.dfunc(this.#outputZ);
 
             // dc/dz(outputs) is calculated differently depending on if the activationOutput is a scalar or vector function
             if(this.#activationOutput.functionType == functionTypes.scalar)
             {
                 // dc/dz(outputs) = dc/dao ○ da/dzo (element wise)
+                // [T] = [T] ○ [T]
                 dcdzo = math.dotMultiply(dcdao, dadzo);
             }
             else
             {
                 // dc/dz(outputs) = dc/dao(T) ⋅ da/dzo (dot product)
+                // [T] = squeeze([1xT]) = squeeze([1xT] ⋅ [TxT])
                 dcdzo = math.squeeze(math.multiply([dcdao], dadzo));
             }
         }
 
         // dc/dw(outputs) = dzo/dwo(T) ⋅ dc/dzo (dot product)
+        // [HxT] = [Hx1] ⋅ [1xT]
         let dcdwo = math.multiply(math.transpose([this.#hiddenA]), [dcdzo]);
 
         // -Hidden layer- 
         // dc/da(hidden) = dc/dz(outputs) ⋅ dz/da(hidden)(T)
+        // [1xH] = [1xT] ⋅ [TxH]
         let dcdah = math.multiply([dcdzo], math.transpose(this.#weightsHO));
 
         // da/dz(hidden)
+        // [1×H] - wrapped in array for consistency
         let dadzh = [this.#activation.dfunc(this.#hiddenZ)];
 
         // dc/dz(hidden) = dc/dah ○ da/dzh (element wise)
-        let dcdzh = math.dotMultiply(dcdah, dadzh);         // meant to be an array?
+        // [1×H] = [1×H] ○ [1×H]
+        let dcdzh = math.dotMultiply(dcdah, dadzh);
 
         // dc/dw(hidden) = dzh/dwh(T) ⋅ dc/dzh (dot product)
+        // [I×H] = [I×1] ⋅ [1×H]
         let dcdwh = math.multiply(math.transpose([input]), dcdzh);
 
         // Update biases
+        // [T] = [T] - ([T] * learningRate)
         this.#biasHOChange = math.subtract(this.#biasHOChange, math.multiply(dcdzo, this.#learningRate));
+        // [H] = [H] - ([H] * learningRate)
         this.#biasIHChange = math.subtract(this.#biasIHChange, math.multiply(dcdzh[0], this.#learningRate));
 
         // Update weights
+        // [H×T] = [H×T] - ([H×T] * learningRate)
         this.#weightsHOChange = math.subtract(this.#weightsHOChange, math.multiply(dcdwo, this.#learningRate));
+        // [I×H] = [I×H] - ([I×H] * learningRate)
         this.#weightsIHChange = math.subtract(this.#weightsIHChange, math.multiply(dcdwh, this.#learningRate));
     }
 
     setLearningRate(newLearningRate)
     {
-        if (isNaN(newLearningRate))
+        if(isNaN(newLearningRate))
         {
             console.warn("Cannot update learning rate because input was not a number")
+        }
+        else if(newLearningRate = 0)
+        {
+            console.warn("Learning rate is 0. Nothing will be learned");
+        }
+        else if(newLearningRate < 0)
+        {
+            console.warn("Learning rate is negative. Model will get worse");
         }
         else
         {
