@@ -132,7 +132,7 @@ let linear = new ActivationFunction
     activationFuncNames.linear,
     functionTypes.scalar,
     x => x,
-    y => y
+    y => 1
 );
 
 // Dictionary of cost functions
