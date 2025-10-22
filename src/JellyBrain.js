@@ -39,19 +39,26 @@ class costFunction{
 let errorSquared = new costFunction
 (
     costFuncNames.errorSquared,
-    (x,y) => {return math.subtract(x,y)}
+    (x,y) => {return math.subtract(y,x)}
 )
 
 let crossEntropy = new costFunction
 (
     costFuncNames.crossEntropy,
-    (x,y) => {return math.dotDivide(x,y)}
+    (x,y) => {return math.dotDivide(math.multiply(x, -1), y)}
 )
 
 let binaryCrossEntropy = new costFunction
 (
     costFuncNames.binaryCrossEntropy,
-    (x,y) => {return math.dotDivide(x, math.dotMultiply(y, math.log(2)))}
+    costFuncNames.binaryCrossEntropy,
+    (x,y) => {
+        // dC/dpred = -(y/(p*ln(2)) - (1-y)/((1-p)*ln(2)))
+        // = -[y/p - (1-y)/(1-p)] / ln(2)
+        const term1 = math.dotDivide(x, y); // target / pred
+        const term2 = math.dotDivide(math.subtract(1, x), math.subtract(1, y)); // (1-target) / (1-pred)
+        return math.dotDivide(math.multiply(math.subtract(term1, term2), -1), Math.log(2));
+    }
 )
 
 // activation function class
@@ -132,7 +139,7 @@ let linear = new ActivationFunction
     activationFuncNames.linear,
     functionTypes.scalar,
     x => x,
-    y => 1
+    y => math.ones(math.size(y))
 );
 
 // Dictionary of cost functions
