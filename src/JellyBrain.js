@@ -406,8 +406,9 @@ class JellyBrain
         if(isNaN(newLearningRate))
         {
             console.warn("Cannot update learning rate because input was not a number")
+            return
         }
-        else if(newLearningRate == 0)
+        if(newLearningRate == 0)
         {
             console.warn("Learning rate is 0. Nothing will be learned");
         }
@@ -415,10 +416,7 @@ class JellyBrain
         {
             console.warn("Learning rate is negative. Model will get worse");
         }
-        else
-        {
-           this.#learningRate = newLearningRate;
-        }
+        this.#learningRate = newLearningRate;
     }
 
     exportBrain()
