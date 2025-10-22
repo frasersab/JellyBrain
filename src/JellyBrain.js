@@ -51,7 +51,6 @@ let crossEntropy = new costFunction
 let binaryCrossEntropy = new costFunction
 (
     costFuncNames.binaryCrossEntropy,
-    costFuncNames.binaryCrossEntropy,
     (x,y) => {
         // dC/dpred = -(y/(p*ln(2)) - (1-y)/((1-p)*ln(2)))
         // = -[y/p - (1-y)/(1-p)] / ln(2)
