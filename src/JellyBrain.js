@@ -408,7 +408,7 @@ class JellyBrain
         {
             console.warn("Cannot update learning rate because input was not a number")
         }
-        else if(newLearningRate = 0)
+        else if(newLearningRate == 0)
         {
             console.warn("Learning rate is 0. Nothing will be learned");
         }
