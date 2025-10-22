@@ -3,6 +3,7 @@
 const { JellyBrain } = require('../JellyBrain')
 
 let brain = new JellyBrain(2, 1, 1);
+brain.setLearningRate(0.05);
 
 // line function
 function y(x) {
@@ -57,13 +58,21 @@ let accuracyTable = Array();
 accuracyTable.push(["Training Samples", "Accuracy"]);
 
 accuracyTable.push([0, tester(brain, 10000)]);
-trainer(brain, 10);
-accuracyTable.push([10, tester(brain, 10000)]);
-trainer(brain, 90);
-accuracyTable.push([100, tester(brain, 10000)]);
-trainer(brain, 400);
-accuracyTable.push([500, tester(brain, 10000)]);
-trainer(brain, 500);
+trainer(brain, 1000);
 accuracyTable.push([1000, tester(brain, 10000)]);
+trainer(brain, 1000);
+accuracyTable.push([2000, tester(brain, 10000)]);
+trainer(brain, 1000);
+accuracyTable.push([3000, tester(brain, 10000)]);
+trainer(brain, 1000);
+accuracyTable.push([4000, tester(brain, 10000)]);
+trainer(brain, 1000);
+accuracyTable.push([5000, tester(brain, 10000)]);
+trainer(brain, 1000);
+accuracyTable.push([6000, tester(brain, 10000)]);
+trainer(brain, 1000);
+accuracyTable.push([7000, tester(brain, 10000)]);
+trainer(brain, 1000);
+accuracyTable.push([8000, tester(brain, 10000)]);
 
 console.table(accuracyTable);
