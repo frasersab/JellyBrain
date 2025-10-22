@@ -184,7 +184,7 @@ class JellyBrain
     #biasIHChange;
     #biasHOChange;
 
-    constructor(inputNodes, hiddenNodes, outputNodes, costFunction = errorSquared, learningRate = 0.005, activationFunction = sigmoid, activationFunctionOutput = sigmoid)
+    constructor(inputNodes, hiddenNodes, outputNodes, costFunction = errorSquared, learningRate = 0.05, activationFunction = sigmoid, activationFunctionOutput = sigmoid)
     {
         // set the parameteres for the neural network
         this.#inputNodes = inputNodes;
