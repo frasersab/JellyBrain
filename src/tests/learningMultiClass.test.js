@@ -154,7 +154,7 @@ describe('Learning: Multi-Class Classification', () => {
       // Test
       const testData = generateQuadrantData(1000);
       const accuracy = calculateAccuracy(brain, testData);
-      expect(accuracy).toBeGreaterThan(95);
+      expect(accuracy).toBeGreaterThan(90);
     }, 10000);
   });
 

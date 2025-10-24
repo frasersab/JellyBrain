@@ -45,7 +45,7 @@ describe('Learning: Binary Classification', () => {
       expect(initialAccuracy).toBeLessThanOrEqual(70);
 
       // Train
-      for (let i = 0; i < 2000; i++) {
+      for (let i = 0; i < 4000; i++) {
         const trainingData = generateLineData(1, lineFunc);
         brain.train(trainingData[0].input, trainingData[0].target);
       }
@@ -129,7 +129,7 @@ describe('Learning: Binary Classification', () => {
       };
 
       // Train
-      for (let i = 0; i < 2000; i++) {
+      for (let i = 0; i < 4000; i++) {
         const trainingData = generateVerticalData(1);
         brain.train(trainingData[0].input, trainingData[0].target);
       }
@@ -147,7 +147,7 @@ describe('Learning: Binary Classification', () => {
       const lineFunc = (x) => x;
 
       // Train using batches
-      for (let epoch = 0; epoch < 100; epoch++) {
+      for (let epoch = 0; epoch < 2000; epoch++) {
         const batchData = generateLineData(20, lineFunc);
         batchData.forEach(({ input, target }) => {
           brain.addToBatch(input, target);

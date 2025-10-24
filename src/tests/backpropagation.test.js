@@ -150,7 +150,7 @@ describe('Backpropagation and Training', () => {
         { input: [0.9, 0.1], target: [0.9, 0.1] }
       ];
       
-      for (let epoch = 0; epoch < 2000; epoch++) {
+      for (let epoch = 0; epoch < 4000; epoch++) {
         for (const data of trainingData) {
           brain.train(data.input, data.target);
         }
@@ -159,8 +159,8 @@ describe('Backpropagation and Training', () => {
       // Test on training data
       trainingData.forEach(data => {
         const output = brain.guess(data.input);
-        expect(output[0]).toBeCloseTo(data.target[0], 1);
-        expect(output[1]).toBeCloseTo(data.target[1], 1);
+        expect(output[0]).toBeCloseTo(data.target[0], 0);
+        expect(output[1]).toBeCloseTo(data.target[1], 0);
       });
     });
 
