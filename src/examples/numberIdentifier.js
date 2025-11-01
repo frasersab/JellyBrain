@@ -1,21 +1,11 @@
 const math = require('mathjs');
 const path = require('path');
 const {JellyBrain, costFuncs, activationFuncs} = require('../JellyBrain.js');
-const {readMNIST, saveMNIST} = require('../mnist_dataset/mnist_reader.js');
-const {readCustom, saveCustom} = require('../custom_dataset/custom_reader.js');
+const {readMNIST} = require('../mnist_dataset/mnist_reader.js');
 const fs = require('fs');
-const cliProgress = require('cli-progress');
 
 // create brain for mnist dataset
 let numberBrain = new JellyBrain(784, 784, 10, costFuncs.crossEntropy, 0.0008, activationFuncs.sigmoid, activationFuncs.softmax);
-
-// save brain
-function saveBrain(brain, name)
-{
-    let contents = JSON.stringify(brain.exportBrain());
-    fs.writeFileSync(path.join(__dirname, '..'
-    , 'brains', `${name}.json`), contents);
-}
 
 // load brain
 function loadBrain(brain, name)
@@ -25,51 +15,10 @@ function loadBrain(brain, name)
     brain.importBrain(contents);
 }
 
-
-// training function
-function trainer(brain, numberOfBatches, batchSize = 1, start = 0, customDataset = false) {
-    const progressBar = new cliProgress.SingleBar({format: 'Training Progress |' + '{bar}' + '| {percentage}% | {value}/{total} | ETA: {eta}s'}, cliProgress.Presets.shades_classic);
-    progressBar.start(numberOfBatches * batchSize, 0);
-
-    for (let batchNumber = 0; batchNumber < numberOfBatches; batchNumber++)
-    {
-        let batchStart = start + (batchNumber * batchSize);
-        let imagesData;
-        if (customDataset)
-        {
-            imagesData = readCustom(batchStart, batchStart + batchSize);
-        }
-        else
-        {
-            imagesData = readMNIST(batchStart, batchStart + batchSize, '\\train_images_60k.idx3-ubyte', '\\train_labels_60k.idx1-ubyte', true);
-        }
-        
-
-        imagesData.forEach(function(image)
-        {
-            targetArray = new Array(10).fill(0);
-            targetArray[image.label] = 1;
-            brain.addToBatch(image.pixels, targetArray);
-            progressBar.increment();
-        })
-        brain.computeBatch();
-    }
-    progressBar.stop();
-}
-
 // testing function
-function tester(brain, amount, start = 0, customDataset = false) {
-    var imagesData;
-    if (customDataset)
-    {
-        imagesData = readCustom(batchStart, start + amount);
-    }
-    else
-    {
-        imagesData = readMNIST(start, start + amount, '\\test_images_10k.idx3-ubyte', '\\test_labels_10k.idx1-ubyte', true);
-    }
-    const progressBar = new cliProgress.SingleBar({format: 'Testing Progress |' + '{bar}' + '| {percentage}% | {value}/{total} | ETA: {eta}s'}, cliProgress.Presets.shades_classic);
-    progressBar.start(amount, 0);
+function tester(brain, amount, start = 0) {
+    var imagesData = readMNIST(start, start + amount, 'test_images_10k.idx3-ubyte', 'test_labels_10k.idx1-ubyte', true);
+    
     let accuracy = 0;
     imagesData.forEach(function(image)
     {
@@ -81,28 +30,46 @@ function tester(brain, amount, start = 0, customDataset = false) {
         if (guessNumber == image.label){
             accuracy++;
         }
-        progressBar.increment();
     })
 
-    progressBar.stop();
     return accuracy = (accuracy / amount) * 100;
 }
 
-let numberOfBatches = 50;
-let batchSize = 1;
-let startFrom = 0;
-let testAmount = 2000;
+console.log("MNIST Digit Recognition Test");
+console.log("=============================\n");
 
-//saveBrain(numberBrain, "brain_before");
-loadBrain(numberBrain, "brain60000")
-
-
+let testAmount = 100;
 let accuracyTable = Array();
-accuracyTable.push(["Training Samples", "Accuracy"]);
-accuracyTable.push([0, tester(numberBrain, testAmount) + "%"]);
-trainer(numberBrain, numberOfBatches, batchSize, startFrom);
-accuracyTable.push([numberOfBatches * batchSize, tester(numberBrain, testAmount) + "%"]);
+accuracyTable.push(["Model", "Training Samples", "Accuracy (%)"]);
 
-saveBrain(numberBrain, "brainPostTraining");
+// Test untrained brain
+console.log("Testing untrained brain...");
+let untrainedBrain = new JellyBrain(784, 784, 10, costFuncs.crossEntropy, 0.0008, activationFuncs.sigmoid, activationFuncs.softmax);
+let accuracyUntrained = tester(untrainedBrain, testAmount);
+accuracyTable.push(["Untrained", "0", accuracyUntrained.toFixed(2)]);
+
+// Test brain trained with 20,000 samples
+console.log("Testing brain20000...");
+let trainedBrain = new JellyBrain(784, 784, 10, costFuncs.crossEntropy, 0.0008, activationFuncs.sigmoid, activationFuncs.softmax);
+loadBrain(trainedBrain, "brain20000");
+let accuracy20k = tester(trainedBrain, testAmount);
+accuracyTable.push(["brain20000", "20,000", accuracy20k.toFixed(2)]);
+
+// Test brain trained with 60,000 samples (full training set)
+console.log("Testing brain60000...");
+loadBrain(trainedBrain, "brain60000");
+let accuracy60k = tester(trainedBrain, testAmount);
+accuracyTable.push(["brain60000", "60,000", accuracy60k.toFixed(2)]);
 
 console.table(accuracyTable);
+
+// Summary
+console.log("\n📊 Summary:");
+let improvement = accuracy60k - accuracyUntrained;
+let percentImprovement = improvement / accuracyUntrained * 100;
+let success = accuracy60k > 90;
+
+console.log(`Untrained Accuracy: ${accuracyUntrained.toFixed(2)}%`);
+console.log(`Final Accuracy (60k samples): ${accuracy60k.toFixed(2)}%`);
+console.log(`Improvement: ${improvement.toFixed(2)}% (${percentImprovement.toFixed(1)}% relative improvement)`);
+console.log(`Success (Accuracy > 90%): ${success ? '✅' : '❌'}`);

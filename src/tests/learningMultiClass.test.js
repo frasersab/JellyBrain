@@ -161,13 +161,13 @@ describe('Learning: Multi-Class Classification', () => {
       const brain = new JellyBrain(
         3, 8, 3,
         costFuncs.crossEntropy,
-        0.1,
+        0.05,
         activationFuncs.relu,
         activationFuncs.softmax
       );
 
       // Train
-      for (let i = 0; i < 4000; i++) {
+      for (let i = 0; i < 5000; i++) {
         const data = generateColorData(1);
         brain.train(data[0].input, data[0].target);
       }

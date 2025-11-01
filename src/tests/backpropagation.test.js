@@ -306,7 +306,7 @@ describe('Backpropagation and Training', () => {
       const brain = new JellyBrain(
         2, 4, 3,
         costFuncs.crossEntropy,
-        0.1,
+        0.05,
         activationFuncs.sigmoid,
         activationFuncs.softmax
       );
@@ -317,7 +317,7 @@ describe('Backpropagation and Training', () => {
       const initialOutput = brain.guess(input);
       const initialProb = initialOutput[1];
       
-      for (let i = 0; i < 100; i++) {
+      for (let i = 0; i < 2000; i++) {
         brain.train(input, target);
       }
       
@@ -333,7 +333,7 @@ describe('Backpropagation and Training', () => {
       const brain = new JellyBrain(
         2, 5, 1,
         costFuncs.errorSquared,
-        0.1,
+        0.05,
         activationFuncs.relu,
         activationFuncs.sigmoid
       );
@@ -343,7 +343,7 @@ describe('Backpropagation and Training', () => {
         { input: [1, 1], target: [1] }
       ];
       
-      for (let epoch = 0; epoch < 200; epoch++) {
+      for (let epoch = 0; epoch < 4000; epoch++) {
         for (const data of trainingData) {
           brain.train(data.input, data.target);
         }

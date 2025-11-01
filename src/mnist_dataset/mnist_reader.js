@@ -1,6 +1,5 @@
 var fs = require('fs');
 var path = require('path');
-const {createCanvas} = require('canvas');
 
 function readMNIST(start, end, imageFile, labelFile, squished = false)
 {
@@ -35,6 +34,7 @@ function readMNIST(start, end, imageFile, labelFile, squished = false)
 
 function saveMNIST(start, end, imageFile, labelFile)
 {
+    const {createCanvas} = require('canvas');
     const canvas = createCanvas(28, 28);
     const ctx = canvas.getContext('2d');
 
@@ -62,9 +62,45 @@ function saveMNIST(start, end, imageFile, labelFile)
         const imagePath = path.join(imagesDir, `image${image.index}-${image.label}.png`);
         fs.writeFileSync(imagePath, buffer)
     })
+    
+    console.log(`Saved ${end - start} MNIST images to ${imagesDir}`);
 }
 
-saveMNIST(0, 5, 'test_images_10k.idx3-ubyte', 'test_labels_10k.idx1-ubyte');
+if (require.main === module) {
+    const args = process.argv.slice(2);
+    
+    if (args.length < 2) {
+        console.log('Usage: node mnist_reader.js <start> <end> [dataset]');
+        console.log('  start: Starting index (0-based)');
+        console.log('  end: Ending index (exclusive)');
+        console.log('  dataset: "train" or "test" (default: "test")');
+        console.log('\nExample: node mnist_reader.js 0 10 test');
+        process.exit(1);
+    }
+
+    const start = parseInt(args[0]);
+    const end = parseInt(args[1]);
+    const dataset = args[2] || 'test';
+    
+    const imageFile = dataset === 'train' ? 
+        'train_images_60k.idx3-ubyte' : 
+        'test_images_10k.idx3-ubyte';
+    const labelFile = dataset === 'train' ? 
+        'train_labels_60k.idx1-ubyte' : 
+        'test_labels_10k.idx1-ubyte';
+
+    try {
+        saveMNIST(start, end, imageFile, labelFile);
+    } catch (error) {
+        if (error.message.includes('Cannot find module \'canvas\'')) {
+            console.error('Error: canvas module is required for saving images');
+            console.error('Install it with: npm install canvas');
+        } else {
+            console.error('Error:', error.message);
+        }
+        process.exit(1);
+    }
+}
 
 exports.readMNIST = readMNIST
 exports.saveMNIST = saveMNIST
