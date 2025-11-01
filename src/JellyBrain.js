@@ -3,7 +3,7 @@
 
 const math = require('mathjs')
 
-// numerations
+// enumerations
 const costFuncNames = Object.freeze(
 {
     errorSquared: Symbol(0),
@@ -52,10 +52,8 @@ let binaryCrossEntropy = new costFunction
 (
     costFuncNames.binaryCrossEntropy,
     (x,y) => {
-        // dC/dpred = -(y/(p*ln(2)) - (1-y)/((1-p)*ln(2)))
-        // = -[y/p - (1-y)/(1-p)] / ln(2)
-        const term1 = math.dotDivide(x, y); // target / pred
-        const term2 = math.dotDivide(math.subtract(1, x), math.subtract(1, y)); // (1-target) / (1-pred)
+        const term1 = math.dotDivide(x, y);
+        const term2 = math.dotDivide(math.subtract(1, x), math.subtract(1, y));
         return math.dotDivide(math.multiply(math.subtract(term1, term2), -1), Math.log(2));
     }
 )
@@ -141,7 +139,7 @@ let linear = new ActivationFunction
     y => math.ones(math.size(y))
 );
 
-// Dictionary of cost functions
+// dictionary of cost functions
 const costFuncs = Object.freeze(
 {
     errorSquared: errorSquared,
@@ -149,7 +147,7 @@ const costFuncs = Object.freeze(
     binaryCrossEntropy: binaryCrossEntropy
 })
 
-// Dictionary of activation functions
+// dictionary of activation functions
 const activationFuncs = Object.freeze(
 {
     softmax: softmax,
@@ -405,7 +403,7 @@ class JellyBrain
     {
         if(isNaN(newLearningRate))
         {
-            console.warn("Cannot update learning rate because input was not a number")
+            console.warn("Cannot update learning rate because input is not a number")
             return
         }
         else if(newLearningRate == 0)
