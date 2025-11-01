@@ -34,7 +34,7 @@ function trainer(brain, amount) {
 
     for (let i = 0; i < amount; i++) {
         inputs[i] = [Math.random()];
-        targets[i] = y(inputs[i])
+        targets[i] = [y(inputs[i][0])]
         brain.train(inputs[i], targets[i]);
     }
 }
@@ -47,7 +47,7 @@ function tester(brain, amount) {
 
     for (let i = 0; i < amount; i++) {
         inputs[i] = [Math.random()];
-        targets[i] = y(inputs[i]);
+        targets[i] = y(inputs[i][0]);
         guess[i] = brain.guess(inputs[i])[0];
     }
 

@@ -35,7 +35,7 @@ function trainer(brain, amount) {
 
     for (let i = 0; i < amount; i++) {
         inputs[i] = [Math.random(), Math.random()];
-        targets[i] = y(inputs[i][0], inputs[i][1])
+        targets[i] = [y(inputs[i][0], inputs[i][1])]
         brain.train(inputs[i], targets[i]);
     }
 }
