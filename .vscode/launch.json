@@ -12,7 +12,7 @@
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}\\src\\test\\simpleLinearRegression.js"
+            "program": "${workspaceFolder}\\src\\examples\\simpleLinearRegression.js"
         },
         {
             "type": "node",
@@ -21,7 +21,7 @@
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}\\src\\test\\multipleLinearRegression.js"
+            "program": "${workspaceFolder}\\src\\examples\\multipleLinearRegression.js"
         },
         {
             "type": "node",
@@ -30,7 +30,7 @@
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}\\src\\test\\binaryClassification.js"
+            "program": "${workspaceFolder}\\src\\examples\\binaryClassification.js"
         },
         {
             "type": "node",
@@ -39,7 +39,7 @@
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}\\src\\test\\numberIdentifier.js"
+            "program": "${workspaceFolder}\\src\\examples\\numberIdentifier.js"
         }
     ]
 }
